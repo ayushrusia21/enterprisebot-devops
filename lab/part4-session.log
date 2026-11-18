@@ -1,0 +1,874 @@
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh up[27m[16D[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mu[27mp[?2004l
+==> applying cluster environment (cluster-state/)
+namespace/debug-lab created
+Error from server (NotFound): error when creating "cluster-state/limits.yaml": namespaces "debug-lab" not found
+==> installing the broken chart
+Release "debug-lab" does not exist. Installing it now.
+Error: Job.batch "migrate" is invalid: spec.template.spec.restartPolicy: Required value: valid values: "OnFailure", "Never"
+
+[2mhelm reported an error. That is not your machine misbehaving —[0m
+[2mit is part of the exercise. Read the error; it is evidence.[0m
+
+Lab is (partially) installed. Investigate with kubectl, fix the chart,
+re-run './scenario.sh up' to apply your fixes, and './scenario.sh verify'
+to check progress.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msed -i '' 's/restartPolicy: Always/restartPolicy: OnFailure/' broken-chart/templates/migrate-job.yaml[27m
+[7m./scenario.sh up[27m[K[A[16C[27ms[27me[27md[27m [27m-[27mi[27m [27m'[27m'[27m [27m'[27ms[27m/[27mr[27me[27ms[27mt[27ma[27mr[27mt[27mP[27mo[27ml[27mi[27mc[27my[27m:[27m [27mA[27ml[27mw[27ma[27my[27ms[27m/[27mr[27me[27ms[27mt[27ma[27mr[27mt[27mP[27mo[27ml[27mi[27mc[27my[27m:[27m [27mO[27mn[27mF[27ma[27mi[27ml[27mu[27mr[27me[27m/[27m'[27m [27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mt[27me[27mm[27mp[27ml[27ma[27mt[27me[27ms[27m/[27mm[27mi[27mg[27mr[27ma[27mt[27me[27m-[27mj[27mo[27mb[27m.[27my[27ma[27mm[27ml[1B[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mu[27mp[?2004l
+==> applying cluster environment (cluster-state/)
+limitrange/debug-lab-guardrails created
+namespace/debug-lab unchanged
+==> installing the broken chart
+Release "debug-lab" has been upgraded. Happy Helming!
+NAME: debug-lab
+LAST DEPLOYED: Wed Nov 18 13:14:53 2026
+NAMESPACE: [36mdebug-lab[0m
+STATUS: [32mdeployed[0m
+REVISION: 2
+DESCRIPTION: Upgrade complete
+TEST SUITE: None
+NOTES:
+debug-lab installed into namespace debug-lab.
+
+Goal state:
+  * migrate Job: Completed
+  * backend, gateway, worker, reporter, metrics: all pods Running and 1/1 Ready
+  * gateway /status reports {"self":"ok","backend":"ok",...}
+
+Check your progress at any time:
+  ./scenario.sh verify
+
+Lab is (partially) installed. Investigate with kubectl, fix the chart,
+re-run './scenario.sh up' to apply your fixes, and './scenario.sh verify'
+to check progress.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh verify[27m[20D[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mv[27me[27mr[27mi[27mf[27my[?2004l
+==> verifying goal state in namespace debug-lab
+  [31mFAIL[0m  migrate Job has not completed (does it exist? did the chart even install cleanly?)
+  [31mFAIL[0m  deployment backend: 0/1 ready
+  [31mFAIL[0m  deployment gateway: 0/1 ready
+  [31mFAIL[0m  deployment worker: 0/1 ready
+  [31mFAIL[0m  deployment reporter: 0/1 ready
+  [31mFAIL[0m  deployment metrics: 0/1 ready
+  [32mPASS[0m  no pods in CrashLoopBackOff
+  [31mFAIL[0m  ServiceAccount debug-lab/reporter cannot list pods
+  [31mFAIL[0m  backend does not answer on http://backend:8080/healthz
+  [31mFAIL[0m  gateway /status does not report backend=ok
+  [31mFAIL[0m  reporter /report does not return a pod count
+
+[31m10 check(s) failing[0m, 1 passing. Keep digging — every failure is a symptom.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get all[27m[28D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27ma[27ml[27ml[?2004l
+NAME                            READY   STATUS                       RESTARTS   AGE
+pod/backend-95d6f4fdb-f6vmr     0/1     CreateContainerConfigError   0          2m6s
+pod/gateway-6b7b7b6494-gzslf    0/1     CreateContainerConfigError   0          2m6s
+pod/metrics-8c7849649-92zz4     0/1     CreateContainerConfigError   0          2m6s
+pod/migrate-bdnhw               0/1     CreateContainerConfigError   0          94s
+pod/reporter-5f4795574d-ts526   0/1     CreateContainerConfigError   0          2m6s
+pod/worker-6fc8464f5d-bj66g     0/1     CreateContainerConfigError   0          2m6s
+
+NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/backend    ClusterIP   10.96.4.249    <none>        8080/TCP   2m6s
+service/gateway    ClusterIP   10.96.52.169   <none>        80/TCP     2m6s
+service/reporter   ClusterIP   10.96.111.69   <none>        8080/TCP   2m6s
+
+NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/backend    0/1     1            0           2m6s
+deployment.apps/gateway    0/1     1            0           2m6s
+deployment.apps/metrics    0/1     1            0           2m6s
+deployment.apps/reporter   0/1     1            0           2m6s
+deployment.apps/worker     0/1     1            0           2m6s
+
+NAME                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/backend-95d6f4fdb     1         1         0       2m6s
+replicaset.apps/gateway-6b7b7b6494    1         1         0       2m6s
+replicaset.apps/metrics-8c7849649     1         1         0       2m6s
+replicaset.apps/reporter-5f4795574d   1         1         0       2m6s
+replicaset.apps/worker-6fc8464f5d     1         1         0       2m6s
+
+NAME                STATUS    COMPLETIONS   DURATION   AGE
+job.batch/migrate   Running   0/1           94s        94s
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab describe pod -l app=backend | tail -15[27m[59D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27md[27me[27ms[27mc[27mr[27mi[27mb[27me[27m [27mp[27mo[27md[27m [27m-[27ml[27m [27ma[27mp[27mp[27m=[27mb[27ma[27mc[27mk[27me[27mn[27md[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m1[27m5[?2004l
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                   From               Message
+  ----     ------     ----                  ----               -------
+  Normal   Scheduled  2m25s                 default-scheduler  Successfully assigned debug-lab/backend-95d6f4fdb-f6vmr to demo-control-plane
+  Normal   Pulling    2m24s                 kubelet            Pulling image "docker.io/ebinterview/eb-debug-app:1.0.1"
+  Normal   Pulled     2m15s                 kubelet            Successfully pulled image "docker.io/ebinterview/eb-debug-app:1.0.1" in 1.326s (9.201s including waiting). Image size: 3279587 bytes.
+  Warning  Failed     10s (x12 over 2m15s)  kubelet            Error: container has runAsNonRoot and image has non-numeric user (nonroot), cannot verify user is non-root (pod: "backend-95d6f4fdb-f6vmr_debug-lab(6b425165-350b-4c14-a26f-217ba0e05b66)", container: backend)
+  Normal   Pulled     10s (x11 over 2m15s)  kubelet            Container image "docker.io/ebinterview/eb-debug-app:1.0.1" already present on machine and can be accessed by the pod
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mperl -pi -e 's/^(\s*)runAsNonRoot: true/$1runAsNonRoot: true\n$1runAsUser: 65532/' broken-chart/templates/*.ya[7mm[7ml[27m[K[A[30C[27mp[27me[27mr[27ml[27m [27m-[27mp[27mi[27m [27m-[27me[27m [27m'[27ms[27m/[27m^[27m([27m\[27ms[27m*[27m)[27mr[27mu[27mn[27mA[27ms[27mN[27mo[27mn[27mR[27mo[27mo[27mt[27m:[27m [27mt[27mr[27mu[27me[27m/[27m$[27m1[27mr[27mu[27mn[27mA[27ms[27mN[27mo[27mn[27mR[27mo[27mo[27mt[27m:[27m [27mt[27mr[27mu[27me[27m\[27mn[27m$[27m1[27mr[27mu[27mn[27mA[27ms[27mU[27ms[27me[27mr[27m:[27m [27m6[27m5[27m5[27m3[27m2[27m/[27m'[27m [27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mt[27me[27mm[27mp[27ml[27ma[27mt[27me[27ms[27m/[27m*[27m.[27my[27mam[27ml[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mgit diff --stat[27m
+[K[A[32C[27mg[27mi[27mt[27m [27md[27mi[27mf[27mf[27m [27m-[27m-[27ms[27mt[27ma[27mt[1B[K[A[47C[?2004l[1B
+[?1h= lab/broken-chart/templates/backend.yaml     | 1 [32m+[m[m
+ lab/broken-chart/templates/gateway.yaml     | 1 [32m+[m[m
+ lab/broken-chart/templates/metrics.yaml     | 1 [32m+[m[m
+ lab/broken-chart/templates/migrate-job.yaml | 3 [32m++[m[31m-[m[m
+ lab/broken-chart/templates/reporter.yaml    | 1 [32m+[m[m
+ lab/broken-chart/templates/worker.yaml      | 1 [32m+[m[m
+ 6 files changed, 7 insertions(+), 1 deletion(-)[m
+[K[?1l>[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh up[27m
+[K[A[32C[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mu[27mp[1B[K[A[48C[?2004l[1B
+==> applying cluster environment (cluster-state/)
+limitrange/debug-lab-guardrails unchanged
+namespace/debug-lab unchanged
+==> installing the broken chart
+level=WARN msg="upgrade failed" name=debug-lab error="Job.batch \"migrate\" is invalid: spec.template: Invalid value: {\"labels\":{\"app\":\"migrate\",\"batch.kubernetes.io/controller-uid\":\"205bb277-dc81-4b21-b038-6556966017a4\",\"batch.kubernetes.io/job-name\":\"migrate\",\"controller-uid\":\"205bb277-dc81-4b21-b038-6556966017a4\",\"job-name\":\"migrate\"},\"Spec\":{\"Volumes\":null,\"InitContainers\":null,\"Containers\":[{\"Name\":\"migrate\",\"Image\":\"docker.io/ebinterview/eb-debug-app:1.0.1\",\"Command\":null,\"Args\":null,\"WorkingDir\":\"\",\"Ports\":null,\"EnvFrom\":null,\"Env\":[{\"Name\":\"APP_MODE\",\"Value\":\"migrate\",\"ValueFrom\":null},{\"Name\":\"APP_NAME\",\"Value\":\"migrate\",\"ValueFrom\":null},{\"Name\":\"VERSION\",\"Value\":\"2.0.0\",\"ValueFrom\":null}],\"Resources\":{\"Limits\":{\"cpu\":\"200m\",\"memory\":\"128Mi\"},\"Requests\":{\"cpu\":\"50m\",\"memory\":\"64Mi\"},\"Claims\":null},\"ResizePolicy\":null,\"RestartPolicy\":null,\"RestartPolicyRules\":null,\"VolumeMounts\":null,\"VolumeDevices\":null,\"LivenessProbe\":null,\"ReadinessProbe\":null,\"StartupProbe\":null,\"Lifecycle\":null,\"TerminationMessagePath\":\"/dev/termination-log\",\"TerminationMessagePolicy\":\"File\",\"ImagePullPolicy\":\"IfNotPresent\",\"SecurityContext\":{\"Capabilities\":{\"Add\":null,\"Drop\":[\"ALL\"]},\"Privileged\":null,\"SELinuxOptions\":null,\"WindowsOptions\":null,\"RunAsUser\":65532,\"RunAsGroup\":null,\"RunAsNonRoot\":true,\"ReadOnlyRootFilesystem\":true,\"AllowPrivilegeEscalation\":false,\"ProcMount\":null,\"SeccompProfile\":null,\"AppArmorProfile\":null},\"Stdin\":false,\"StdinOnce\":false,\"TTY\":false}],\"EphemeralContainers\":null,\"RestartPolicy\":\"OnFailure\",\"TerminationGracePeriodSeconds\":30,\"ActiveDeadlineSeconds\":null,\"DNSPolicy\":\"ClusterFirst\",\"NodeSelector\":null,\"ServiceAccountName\":\"\",\"AutomountServiceAccountToken\":null,\"NodeName\":\"\",\"SecurityContext\":{\"HostNetwork\":false,\"HostPID\":false,\"HostIPC\":false,\"ShareProcessNamespace\":null,\"HostUsers\":null,\"SELinuxOptions\":null,\"WindowsOptions\":null,\"RunAsUser\":null,\"RunAsGroup\":null,\"RunAsNonRoot\":null,\"SupplementalGroups\":null,\"SupplementalGroupsPolicy\":null,\"FSGroup\":null,\"FSGroupChangePolicy\":null,\"Sysctls\":null,\"SeccompProfile\":null,\"AppArmorProfile\":null,\"SELinuxChangePolicy\":null},\"ImagePullSecrets\":null,\"Hostname\":\"\",\"Subdomain\":\"\",\"SetHostnameAsFQDN\":null,\"Affinity\":null,\"SchedulerName\":\"default-scheduler\",\"Tolerations\":null,\"HostAliases\":null,\"PriorityClassName\":\"\",\"Priority\":null,\"PreemptionPolicy\":null,\"DNSConfig\":null,\"ReadinessGates\":null,\"RuntimeClassName\":null,\"Overhead\":null,\"EnableServiceLinks\":null,\"TopologySpreadConstraints\":null,\"OS\":null,\"SchedulingGates\":null,\"ResourceClaims\":null,\"Resources\":null,\"HostnameOverride\":null,\"WorkloadRef\":null}}: field is immutable"
+Error: UPGRADE FAILED: Job.batch "migrate" is invalid: spec.template: Invalid value: {"labels":{"app":"migrate","batch.kubernetes.io/controller-uid":"205bb277-dc81-4b21-b038-6556966017a4","batch.kubernetes.io/job-name":"migrate","controller-uid":"205bb277-dc81-4b21-b038-6556966017a4","job-name":"migrate"},"Spec":{"Volumes":null,"InitContainers":null,"Containers":[{"Name":"migrate","Image":"docker.io/ebinterview/eb-debug-app:1.0.1","Command":null,"Args":null,"WorkingDir":"","Ports":null,"EnvFrom":null,"Env":[{"Name":"APP_MODE","Value":"migrate","ValueFrom":null},{"Name":"APP_NAME","Value":"migrate","ValueFrom":null},{"Name":"VERSION","Value":"2.0.0","ValueFrom":null}],"Resources":{"Limits":{"cpu":"200m","memory":"128Mi"},"Requests":{"cpu":"50m","memory":"64Mi"},"Claims":null},"ResizePolicy":null,"RestartPolicy":null,"RestartPolicyRules":null,"VolumeMounts":null,"VolumeDevices":null,"LivenessProbe":null,"ReadinessProbe":null,"StartupProbe":null,"Lifecycle":null,"TerminationMessagePath":"/dev/termination-log","TerminationMessagePolicy":"File","ImagePullPolicy":"IfNotPresent","SecurityContext":{"Capabilities":{"Add":null,"Drop":["ALL"]},"Privileged":null,"SELinuxOptions":null,"WindowsOptions":null,"RunAsUser":65532,"RunAsGroup":null,"RunAsNonRoot":true,"ReadOnlyRootFilesystem":true,"AllowPrivilegeEscalation":false,"ProcMount":null,"SeccompProfile":null,"AppArmorProfile":null},"Stdin":false,"StdinOnce":false,"TTY":false}],"EphemeralContainers":null,"RestartPolicy":"OnFailure","TerminationGracePeriodSeconds":30,"ActiveDeadlineSeconds":null,"DNSPolicy":"ClusterFirst","NodeSelector":null,"ServiceAccountName":"","AutomountServiceAccountToken":null,"NodeName":"","SecurityContext":{"HostNetwork":false,"HostPID":false,"HostIPC":false,"ShareProcessNamespace":null,"HostUsers":null,"SELinuxOptions":null,"WindowsOptions":null,"RunAsUser":null,"RunAsGroup":null,"RunAsNonRoot":null,"SupplementalGroups":null,"SupplementalGroupsPolicy":null,"FSGroup":null,"FSGroupChangePolicy":null,"Sysctls":null,"SeccompProfile":null,"AppArmorProfile":null,"SELinuxChangePolicy":null},"ImagePullSecrets":null,"Hostname":"","Subdomain":"","SetHostnameAsFQDN":null,"Affinity":null,"SchedulerName":"default-scheduler","Tolerations":null,"HostAliases":null,"PriorityClassName":"","Priority":null,"PreemptionPolicy":null,"DNSConfig":null,"ReadinessGates":null,"RuntimeClassName":null,"Overhead":null,"EnableServiceLinks":null,"TopologySpreadConstraints":null,"OS":null,"SchedulingGates":null,"ResourceClaims":null,"Resources":null,"HostnameOverride":null,"WorkloadRef":null}}: field is immutable
+
+[2mhelm reported an error. That is not your machine misbehaving —[0m
+[2mit is part of the exercise. Read the error; it is evidence.[0m
+
+Lab is (partially) installed. Investigate with kubectl, fix the chart,
+re-run './scenario.sh up' to apply your fixes, and './scenario.sh verify'
+to check progress.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get pods[27m[29D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mp[27mo[27md[27ms[?2004l
+NAME                        READY   STATUS                       RESTARTS     AGE
+backend-57cfbdbb8-nnn94     0/1     Running                      0            6s
+backend-95d6f4fdb-f6vmr     0/1     CreateContainerConfigError   0            4m7s
+gateway-6b7b7b6494-gzslf    0/1     CreateContainerConfigError   0            4m7s
+gateway-78db66c64-wq6m7     0/1     Running                      0            6s
+metrics-8c7849649-92zz4     0/1     CreateContainerConfigError   0            4m7s
+migrate-bdnhw               0/1     CreateContainerConfigError   0            3m35s
+reporter-5f4795574d-ts526   0/1     CreateContainerConfigError   0            4m7s
+reporter-648d58fb7d-67m4w   0/1     Running                      0            6s
+worker-558fc899b8-bkn8v     0/1     CrashLoopBackOff             1 (4s ago)   6s
+worker-6fc8464f5d-bj66g     0/1     CreateContainerConfigError   0            4m7s
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab delete job migrate[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27md[27me[27ml[27me[27mt[27me[27m [27mj[27mo[27mb[27m [27mm[27mi[27mg[27mr[27ma[27mt[27me[1B[K[A[71C[?2004l[1B
+job.batch "migrate" deleted
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh up 2>&1 | tail -15[27m
+[K[A[32C[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mu[27mp[27m [27m2[27m>[27m&[27m1[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m1[27m5[1B[K[A[64C[?2004l[1B
+TEST SUITE: None
+NOTES:
+debug-lab installed into namespace debug-lab.
+
+Goal state:
+  * migrate Job: Completed
+  * backend, gateway, worker, reporter, metrics: all pods Running and 1/1 Ready
+  * gateway /status reports {"self":"ok","backend":"ok",...}
+
+Check your progress at any time:
+  ./scenario.sh verify
+
+Lab is (partially) installed. Investigate with kubectl, fix the chart,
+re-run './scenario.sh up' to apply your fixes, and './scenario.sh verify'
+to check progress.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get pods[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mp[27mo[27md[27ms[1B[K[?2004l
+NAME                        READY   STATUS                       RESTARTS      AGE
+backend-57cfbdbb8-nnn94     0/1     Running                      0             52s
+backend-95d6f4fdb-f6vmr     0/1     CreateContainerConfigError   0             4m53s
+gateway-6b7b7b6494-gzslf    0/1     CreateContainerConfigError   0             4m53s
+gateway-78db66c64-wq6m7     0/1     Running                      0             52s
+metrics-8c7849649-92zz4     0/1     CreateContainerConfigError   0             4m53s
+migrate-8p8l2               0/1     Completed                    0             7s
+reporter-5f4795574d-ts526   0/1     CreateContainerConfigError   0             4m53s
+reporter-648d58fb7d-67m4w   0/1     Running                      0             52s
+worker-558fc899b8-bkn8v     0/1     CrashLoopBackOff             3 (10s ago)   52s
+worker-6fc8464f5d-bj66g     0/1     CreateContainerConfigError   0             4m53s
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs deploy/worker --tail=15[27m[49D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27md[27me[27mp[27ml[27mo[27my[27m/[27mw[27mo[27mr[27mk[27me[27mr[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m1[27m5[?2004l
+Found 2 pods, using pod/worker-558fc899b8-bkn8v
+2026/11/18 07:49:04 FATAL: worker could not initialise its cache: mkdir /var/cache/app: read-only file system — the process needs a writable directory at /var/cache/app (mount a volume there, or set CACHE_DIR)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mpython3 - <<'EOF'[27m
+[7mp = "broken-chart/templates/worker.yaml"[27m[K
+[7ms = open(p).read()[27m[K
+[7ms = s.replace("""          resources:[27m[K
+[7m            {{- toYaml .Values.worker.resources | nindent 12 }}""", """          volumeMounts:[27m[K
+[7m            - name: cache[27m[K
+[7m              mountPath: /var/cache/app[27m[K
+[7m          resources:[27m[K
+[7m            {{- toYaml .Values.worker.resources | nindent 12 }}[27m[K
+[7m      volumes:[27m[K
+[7m        - name: cache[27m[K
+[7m          emptyDir: {}""")[27m[K
+[7mopen(p, "w").write(s)[27m[K
+[7mEOF[27m[K[13A[29C[27mp[27my[27mt[27mh[27mo[27mn[27m3[27m [27m-[27m [27m<[27m<[27m'[27mE[27mO[27mF[27m'[1B[27mp[27m [27m=[27m [27m"[27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mt[27me[27mm[27mp[27ml[27ma[27mt[27me[27ms[27m/[27mw[27mo[27mr[27mk[27me[27mr[27m.[27my[27ma[27mm[27ml[27m"[1B[27ms[27m [27m=[27m [27mo[27mp[27me[27mn[27m([27mp[27m)[27m.[27mr[27me[27ma[27md[27m([27m)[1B[27ms[27m [27m=[27m [27ms[27m.[27mr[27me[27mp[27ml[27ma[27mc[27me[27m([27m"[27m"[27m"[20P[10Cresources:[85C[K[1B[94P[12C{{- toYaml .Values.worker.resources | nindent 12 }}""", """          volumeMounts:[K[1B[25P[12C- name: cache[92C[K[1B[39P[14CmountPath: /var/cache/app[64C[K[1B[20P[10Cresources:[102C[K[1B[63P[12C{{- toYaml .Values.worker.resources | nindent 12 }}[16C[K[1B[27m [27m [27m [27m [27m [27m [27mv[27mo[27ml[27mu[27mm[27me[27ms[27m:[1B[27m [27m [27m [27m [27m [27m [27m [27m [27m-[27m [27mn[27ma[27mm[27me[27m:[27m [27mc[27ma[27mc[27mh[27me[1B[26P[10CemptyDir: {}""")[90C[K[1B[27mo[27mp[27me[27mn[27m([27mp[27m,[27m [27m"[27mw[27m"[27m)[27m.[27mw[27mr[27mi[27mt[27me[27m([27ms[27m)[1B[27mE[27mO[27mF[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mgit diff broken-chart/templates/worker.yaml[27m
+[K[A[32C[27mg[27mi[27mt[27m [27md[27mi[27mf[27mf[27m [27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mt[27me[27mm[27mp[27ml[27ma[27mt[27me[27ms[27m/[27mw[27mo[27mr[27mk[27me[27mr[27m.[27my[27ma[27mm[27ml[1B[K[A[75C[?2004l[1B
+[?1h=[1mdiff --git a/lab/broken-chart/templates/worker.yaml b/lab/broken-chart/templates/worker.yaml[m[m
+[1mindex 1befdfa..8128730 100644[m[m
+[1m--- a/lab/broken-chart/templates/worker.yaml[m[m
+[1m+++ b/lab/broken-chart/templates/worker.yaml[m[m
+[36m@@ -37,9 +37,16 @@[m [mspec:[m[m
+             timeoutSeconds: 3[m[m
+           securityContext:[m[m
+             runAsNonRoot: true[m[m
+[32m+[m[32m            runAsUser: 65532[m[m
+             readOnlyRootFilesystem: true[m[m
+             allowPrivilegeEscalation: false[m[m
+             capabilities:[m[m
+               drop: ["ALL"][m[m
+[32m+[m[32m          volumeMounts:[m[m
+[32m+[m[32m            - name: cache[m[m
+[32m+[m[32m              mountPath: /var/cache/app[m[m
+           resources:[m[m
+             {{- toYaml .Values.worker.resources | nindent 12 }}[m[m
+[32m+[m[32m      volumes:[m[m
+[32m+[m[32m        - name: cache[m[m
+[32m+[m[32m          emptyDir: {}[m[m
+[K[?1l>[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh up 2>&1 | tail -3[27m
+[K[A[32C[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mu[27mp[27m [27m2[27m>[27m&[27m1[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m3[1B[K[A[63C[?2004l[1B
+Lab is (partially) installed. Investigate with kubectl, fix the chart,
+re-run './scenario.sh up' to apply your fixes, and './scenario.sh verify'
+to check progress.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get pods[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mp[27mo[27md[27ms[1B[K[A[61C[?2004l[1B
+NAME                        READY   STATUS                       RESTARTS      AGE
+backend-57cfbdbb8-nnn94     0/1     Running                      0             2m22s
+backend-95d6f4fdb-f6vmr     0/1     CreateContainerConfigError   0             6m23s
+gateway-6b7b7b6494-gzslf    0/1     CreateContainerConfigError   0             6m23s
+gateway-78db66c64-wq6m7     0/1     Running                      0             2m22s
+metrics-8c7849649-92zz4     0/1     CreateContainerConfigError   0             6m23s
+migrate-8p8l2               0/1     Completed                    0             97s
+reporter-5f4795574d-ts526   0/1     CreateContainerConfigError   0             6m23s
+reporter-648d58fb7d-67m4w   0/1     Running                      0             2m22s
+worker-5456c76bc9-bcrjl     0/1     Running                      0             5s
+worker-558fc899b8-bkn8v     0/1     CrashLoopBackOff             4 (50s ago)   2m22s
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab describe pod -l app=backend | tail -8[27m[58D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27md[27me[27ms[27mc[27mr[27mi[27mb[27me[27m [27mp[27mo[27md[27m [27m-[27ml[27m [27ma[27mp[27mp[27m=[27mb[27ma[27mc[27mk[27me[27mn[27md[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m8[?2004l
+Events:
+  Type     Reason     Age                   From               Message
+  ----     ------     ----                  ----               -------
+  Normal   Scheduled  6m28s                 default-scheduler  Successfully assigned debug-lab/backend-95d6f4fdb-f6vmr to demo-control-plane
+  Normal   Pulling    6m27s                 kubelet            Pulling image "docker.io/ebinterview/eb-debug-app:1.0.1"
+  Normal   Pulled     6m18s                 kubelet            Successfully pulled image "docker.io/ebinterview/eb-debug-app:1.0.1" in 1.326s (9.201s including waiting). Image size: 3279587 bytes.
+  Normal   Pulled     73s (x24 over 6m18s)  kubelet            Container image "docker.io/ebinterview/eb-debug-app:1.0.1" already present on machine and can be accessed by the pod
+  Warning  Failed     60s (x26 over 6m18s)  kubelet            Error: container has runAsNonRoot and image has non-numeric user (nonroot), cannot verify user is non-root (pod: "backend-95d6f4fdb-f6vmr_debug-lab(6b425165-350b-4c14-a26f-217ba0e05b66)", container: backend)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab describe pod backend-57cfbdbb8-nnn94 | tail -8[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27md[27me[27ms[27mc[27mr[27mi[27mb[27me[27m [27mp[27mo[27md[27m [27mb[27ma[27mc[27mk[27me[27mn[27md[27m-[27m5[27m7[27mc[27mf[27mb[27md[27mb[27mb[27m8[27m-[27mn[27mn[27mn[27m9[27m4[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m8[1B[K[?2004l
+Events:
+  Type     Reason     Age                   From               Message
+  ----     ------     ----                  ----               -------
+  Normal   Scheduled  3m3s                  default-scheduler  Successfully assigned debug-lab/backend-57cfbdbb8-nnn94 to demo-control-plane
+  Normal   Pulled     3m3s                  kubelet            Container image "docker.io/ebinterview/eb-debug-app:1.0.1" already present on machine and can be accessed by the pod
+  Normal   Created    3m3s                  kubelet            Container created
+  Normal   Started    3m3s                  kubelet            Container started
+  Warning  Unhealthy  57s (x25 over 2m56s)  kubelet            Readiness probe failed: Get "http://10.244.0.17:8080/healthz": dial tcp 10.244.0.17:8080: connect: connection refused
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs backend-57cfbdbb8-nnn94 --tail=15[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27mb[27ma[27mc[27mk[27me[27mn[27md[27m-[27m5[27m7[27mc[27mf[27mb[27md[27mb[27mb[27m8[27m-[27mn[27mn[27mn[27m9[27m4[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m1[27m5[1B[K[?2004l
+2026/11/18 07:48:23 eb-debug-app 2.0.0 starting: mode=api pod=backend-57cfbdbb8-nnn94 listening on :8081 (image default is 8081; set PORT to override)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs deploy/gateway --tail=10[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27md[27me[27mp[27ml[27mo[27my[27m/[27mg[27ma[27mt[27me[27mw[27ma[27my[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m1[27m0[1B[K[A[82C[?2004l[1B
+Found 2 pods, using pod/gateway-78db66c64-wq6m7
+2026/11/18 07:48:23 eb-debug-app 2.0.0 starting: mode=gateway pod=gateway-78db66c64-wq6m7 listening on :8081 (image default is 8081; set PORT to override)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs deploy/reporter --tail=10[27m[51D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27md[27me[27mp[27ml[27mo[27my[27m/[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m1[27m0[?2004l
+Found 2 pods, using pod/reporter-648d58fb7d-67m4w
+2026/11/18 07:48:23 eb-debug-app 2.0.0 starting: mode=reporter pod=reporter-648d58fb7d-67m4w listening on :8081 (image default is 8081; set PORT to override)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mfor f in backend gateway metrics reporter worker; do[27m
+[7m  perl -0777 -pi -e 's/^(\s*)env:\n/$1env:\n$1  - name: PORT\n$1    value: {{ .Values.common.port | quote }}\n/m' broken-chart/templates/$f.ya[7mm[7ml[27m[K
+[7mdone[27m[K[3A[28C[27mf[27mo[27mr[27m [27mf[27m [27mi[27mn[27m [27mb[27ma[27mc[27mk[27me[27mn[27md[27m [27mg[27ma[27mt[27me[27mw[27ma[27my[27m [27mm[27me[27mt[27mr[27mi[27mc[27ms[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m [27mw[27mo[27mr[27mk[27me[27mr[27m;[27m [27md[27mo[1B[27m [27m [27mp[27me[27mr[27ml[27m [27m-[27m0[27m7[27m7[27m7[27m [27m-[27mp[27mi[27m [27m-[27me[27m [27m'[27ms[27m/[27m^[27m([27m\[27ms[27m*[27m)[27me[27mn[27mv[27m:[27m\[27mn[27m/[27m$[27m1[27me[27mn[27mv[27m:[27m\[27mn[27m$[27m1[27m [27m [27m-[27m [27mn[27ma[27mm[27me[27m:[27m [27mP[27mO[27mR[27mT[27m\[27mn[27m$[27m1[27m [27m [27m [27m [27mv[27ma[27ml[27mu[27me[27m:[27m [27m{[27m{[27m [27m.[27mV[27ma[27ml[27mu[27me[27ms[27m.[27mc[27mo[27mm[27mm[27mo[27mn[27m.[27mp[27mo[27mr[27mt[27m [27m|[27m [27mq[27mu[27mo[27mt[27me[27m [27m}[27m}[27m\[27mn[27m/[27mm[27m'[27m [27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mt[27me[27mm[27mp[27ml[27ma[27mt[27me[27ms[27m/[27m$[27mf[27m.[27my[27mam[27ml[1B[27md[27mo[27mn[27me[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mgit diff broken-chart/templates/backend.yaml | grep '^[+-]'[27m[59D[27mg[27mi[27mt[27m [27md[27mi[27mf[27mf[27m [27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mt[27me[27mm[27mp[27ml[27ma[27mt[27me[27ms[27m/[27mb[27ma[27mc[27mk[27me[27mn[27md[27m.[27my[27ma[27mm[27ml[27m [27m|[27m [27mg[27mr[27me[27mp[27m [27m'[27m^[27m[[27m+[27m-[27m][27m'[?2004l
+--- a/lab/broken-chart/templates/backend.yaml
++++ b/lab/broken-chart/templates/backend.yaml
++            - name: PORT
++              value: {{ .Values.common.port | quote }}
++            runAsUser: 65532
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh up 2>&1 | tail -3[27m[31D[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mu[27mp[27m [27m2[27m>[27m&[27m1[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m3[?2004l
+Lab is (partially) installed. Investigate with kubectl, fix the chart,
+re-run './scenario.sh up' to apply your fixes, and './scenario.sh verify'
+to check progress.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msleep 20[27m[8D[27ms[27ml[27me[27me[27mp[27m [27m2[27m0[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get pods[27m[29D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mp[27mo[27md[27ms[?2004l
+NAME                        READY   STATUS      RESTARTS   AGE
+backend-7d9bb9d6c4-5lc5d    1/1     Running     0          62s
+gateway-78c956cf94-2xhwr    0/1     Running     0          62s
+gateway-78db66c64-wq6m7     0/1     Running     0          5m22s
+migrate-8p8l2               0/1     Completed   0          4m37s
+reporter-648d58fb7d-67m4w   0/1     Running     0          5m22s
+reporter-c8cd74d-fx76v      0/1     Running     0          61s
+worker-7dcff88467-tzmrl     1/1     Running     0          61s
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh verify[27m[20D[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mv[27me[27mr[27mi[27mf[27my[?2004l
+==> verifying goal state in namespace debug-lab
+  [32mPASS[0m  migrate Job completed
+  [32mPASS[0m  deployment backend: 1/1 ready
+  [31mFAIL[0m  deployment gateway: 0/1 ready
+  [32mPASS[0m  deployment worker: 1/1 ready
+  [31mFAIL[0m  deployment reporter: 0/1 ready
+  [31mFAIL[0m  deployment metrics: 0/1 ready
+  [32mPASS[0m  no pods in CrashLoopBackOff
+  [31mFAIL[0m  ServiceAccount debug-lab/reporter cannot list pods
+  [31mFAIL[0m  backend does not answer on http://backend:8080/healthz
+  [31mFAIL[0m  gateway /status does not report backend=ok
+  [31mFAIL[0m  reporter /report does not return a pod count
+
+[31m7 check(s) failing[0m, 4 passing. Keep digging — every failure is a symptom.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs deploy/gateway --tail=10[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27md[27me[27mp[27ml[27mo[27my[27m/[27mg[27ma[27mt[27me[27mw[27ma[27my[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m1[27m0[1B[K[A[82C[?2004l[1B
+Found 2 pods, using pod/gateway-78db66c64-wq6m7
+2026/11/18 07:48:23 eb-debug-app 2.0.0 starting: mode=gateway pod=gateway-78db66c64-wq6m7 listening on :8081 (image default is 8081; set PORT to override)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs deploy/reporter --tail=10[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27md[27me[27mp[27ml[27mo[27my[27m/[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m1[27m0[1B[K[A[83C[?2004l[1B
+Found 2 pods, using pod/reporter-648d58fb7d-67m4w
+2026/11/18 07:48:23 eb-debug-app 2.0.0 starting: mode=reporter pod=reporter-648d58fb7d-67m4w listening on :8081 (image default is 8081; set PORT to override)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab describe rs -l app=metrics | tail -8[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27md[27me[27ms[27mc[27mr[27mi[27mb[27me[27m [27mr[27ms[27m [27m-[27ml[27m [27ma[27mp[27mp[27m=[27mm[27me[27mt[27mr[27mi[27mc[27ms[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m8[1B[K[A[89C[?2004l[1B
+  Volumes:         <none>
+  Node-Selectors:  <none>
+  Tolerations:     <none>
+Events:
+  Type    Reason            Age    From                   Message
+  ----    ------            ----   ----                   -------
+  Normal  SuccessfulCreate  10m    replicaset-controller  Created pod: metrics-8c7849649-92zz4
+  Normal  SuccessfulDelete  2m26s  replicaset-controller  Deleted pod: metrics-8c7849649-92zz4
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get rolebinding reporter-read -o yaml | grep -A5 subjects[27m[78D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mr[27mo[27ml[27me[27mb[27mi[27mn[27md[27mi[27mn[27mg[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m-[27mr[27me[27ma[27md[27m [27m-[27mo[27m [27my[27ma[27mm[27ml[27m [27m|[27m [27mg[27mr[27me[27mp[27m [27m-[27mA[27m5[27m [27ms[27mu[27mb[27mj[27me[27mc[27mt[27ms[?2004l
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: debug-lab
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msed -i '' 's/name: default/name: reporter/' broken-chart/templates/rbac.yaml[27m
+[K[A[32C[27ms[27me[27md[27m [27m-[27mi[27m [27m'[27m'[27m [27m'[27ms[27m/[27mn[27ma[27mm[27me[27m:[27m [27md[27me[27mf[27ma[27mu[27ml[27mt[27m/[27mn[27ma[27mm[27me[27m:[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m/[27m'[27m [27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mt[27me[27mm[27mp[27ml[27ma[27mt[27me[27ms[27m/[27mr[27mb[27ma[27mc[27m.[27my[27ma[27mm[27ml[1B[K[A[108C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mgit diff broken-chart/templates/rbac.yaml | grep '^[+-]'[27m
+[K[A[32C[27mg[27mi[27mt[27m [27md[27mi[27mf[27mf[27m [27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mt[27me[27mm[27mp[27ml[27ma[27mt[27me[27ms[27m/[27mr[27mb[27ma[27mc[27m.[27my[27ma[27mm[27ml[27m [27m|[27m [27mg[27mr[27me[27mp[27m [27m'[27m^[27m[[27m+[27m-[27m][27m'[1B[K[A[88C[?2004l[1B
+--- a/lab/broken-chart/templates/rbac.yaml
++++ b/lab/broken-chart/templates/rbac.yaml
+-    name: default
++    name: reporter
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get rs[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mr[27ms[1B[K[?2004l
+NAME                  DESIRED   CURRENT   READY   AGE
+backend-57cfbdbb8     0         0         0       7m33s
+backend-7d9bb9d6c4    1         1         1       3m13s
+backend-95d6f4fdb     0         0         0       11m
+gateway-6b7b7b6494    0         0         0       11m
+gateway-78c956cf94    1         1         0       3m13s
+gateway-78db66c64     1         1         0       7m33s
+metrics-5fbdd57d89    1         0         0       3m13s
+metrics-846d687dc9    1         0         0       7m33s
+metrics-8c7849649     0         0         0       11m
+reporter-5f4795574d   0         0         0       11m
+reporter-648d58fb7d   1         1         0       7m33s
+reporter-c8cd74d      1         1         0       3m13s
+worker-5456c76bc9     0         0         0       5m16s
+worker-558fc899b8     0         0         0       7m33s
+worker-6fc8464f5d     0         0         0       11m
+worker-7dcff88467     1         1         1       3m13s
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab describe deploy metrics | tail -12[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27md[27me[27ms[27mc[27mr[27mi[27mb[27me[27m [27md[27me[27mp[27ml[27mo[27my[27m [27mm[27me[27mt[27mr[27mi[27mc[27ms[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m1[27m2[1B[K[?2004l
+  Available        False   MinimumReplicasUnavailable
+  ReplicaFailure   True    FailedCreate
+  Progressing      True    ReplicaSetUpdated
+OldReplicaSets:    metrics-8c7849649 (0/0 replicas created), metrics-846d687dc9 (0/1 replicas created)
+NewReplicaSet:     metrics-5fbdd57d89 (0/1 replicas created)
+Events:
+  Type    Reason             Age    From                   Message
+  ----    ------             ----   ----                   -------
+  Normal  ScalingReplicaSet  11m    deployment-controller  Scaled up replica set metrics-8c7849649 from 0 to 1
+  Normal  ScalingReplicaSet  7m38s  deployment-controller  Scaled up replica set metrics-846d687dc9 from 0 to 1
+  Normal  ScalingReplicaSet  3m18s  deployment-controller  Scaled down replica set metrics-8c7849649 from 1 to 0
+  Normal  ScalingReplicaSet  3m18s  deployment-controller  Scaled up replica set metrics-5fbdd57d89 from 0 to 1
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs gateway-78c956cf94-2xhwr --tail=10[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27mg[27ma[27mt[27me[27mw[27ma[27my[27m-[27m7[27m8[27mc[27m9[27m5[27m6[27mc[27mf[27m9[27m4[27m-[27m2[27mx[27mh[27mw[27mr[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m1[27m0[1B[K[A[92C[?2004l[1B
+2026/11/18 07:55:45 readiness failed: backend not reachable: GET http://backend.default.svc:8080/healthz: Get "http://backend.default.svc:8080/healthz": dial tcp: lookup backend.default.svc on 10.96.0.10:53: no such host
+2026/11/18 07:55:45 GET /healthz -> 503 (from 10.244.0.1:47838)
+2026/11/18 07:55:50 readiness failed: backend not reachable: GET http://backend.default.svc:8080/healthz: Get "http://backend.default.svc:8080/healthz": dial tcp: lookup backend.default.svc on 10.96.0.10:53: no such host
+2026/11/18 07:55:50 GET /healthz -> 503 (from 10.244.0.1:47854)
+2026/11/18 07:55:55 readiness failed: backend not reachable: GET http://backend.default.svc:8080/healthz: Get "http://backend.default.svc:8080/healthz": dial tcp: lookup backend.default.svc on 10.96.0.10:53: no such host
+2026/11/18 07:55:55 GET /healthz -> 503 (from 10.244.0.1:41546)
+2026/11/18 07:56:00 readiness failed: backend not reachable: GET http://backend.default.svc:8080/healthz: Get "http://backend.default.svc:8080/healthz": dial tcp: lookup backend.default.svc on 10.96.0.10:53: no such host
+2026/11/18 07:56:00 GET /healthz -> 503 (from 10.244.0.1:41560)
+2026/11/18 07:56:05 readiness failed: backend not reachable: GET http://backend.default.svc:8080/healthz: Get "http://backend.default.svc:8080/healthz": dial tcp: lookup backend.default.svc on 10.96.0.10:53: no such host
+2026/11/18 07:56:05 GET /healthz -> 503 (from 10.244.0.1:41416)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs reporter-c8cd74d-fx76v --tail=10[27m[58D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m-[27mc[27m8[27mc[27md[27m7[27m4[27md[27m-[27mf[27mx[27m7[27m6[27mv[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m1[27m0[?2004l
+2026/11/18 07:55:44 GET /healthz -> 503 (from 10.244.0.1:36952)
+2026/11/18 07:55:49 pod list failed: kubernetes API returned HTTP 403: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:debug-lab:reporter\" cannot list resource \"pods\" in API group \"\" in the namespace \"debug-lab\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+2026/11/18 07:55:49 GET /healthz -> 503 (from 10.244.0.1:36468)
+2026/11/18 07:55:54 pod list failed: kubernetes API returned HTTP 403: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:debug-lab:reporter\" cannot list resource \"pods\" in API group \"\" in the namespace \"debug-lab\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+2026/11/18 07:55:54 GET /healthz -> 503 (from 10.244.0.1:36482)
+2026/11/18 07:55:59 GET /healthz -> 503 (from 10.244.0.1:56686)
+2026/11/18 07:56:04 pod list failed: kubernetes API returned HTTP 403: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:debug-lab:reporter\" cannot list resource \"pods\" in API group \"\" in the namespace \"debug-lab\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+2026/11/18 07:56:04 GET /healthz -> 503 (from 10.244.0.1:56690)
+2026/11/18 07:56:09 pod list failed: kubernetes API returned HTTP 403: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:debug-lab:reporter\" cannot list resource \"pods\" in API group \"\" in the namespace \"debug-lab\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+2026/11/18 07:56:09 GET /healthz -> 503 (from 10.244.0.1:46940)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab describe rs metrics-5fbdd57d89 | grep -A6 Events[27m[69D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27md[27me[27ms[27mc[27mr[27mi[27mb[27me[27m [27mr[27ms[27m [27mm[27me[27mt[27mr[27mi[27mc[27ms[27m-[27m5[27mf[27mb[27md[27md[27m5[27m7[27md[27m8[27m9[27m [27m|[27m [27mg[27mr[27me[27mp[27m [27m-[27mA[27m6[27m [27mE[27mv[27me[27mn[27mt[27ms[?2004l
+Events:
+  Type     Reason        Age                  From                   Message
+  ----     ------        ----                 ----                   -------
+  Warning  FailedCreate  4m18s                replicaset-controller  Error creating: pods "metrics-5fbdd57d89-wkr2p" is forbidden: maximum cpu usage per Container is 1, but limit is 4
+  Warning  FailedCreate  4m18s                replicaset-controller  Error creating: pods "metrics-5fbdd57d89-hf8pc" is forbidden: maximum cpu usage per Container is 1, but limit is 4
+  Warning  FailedCreate  4m18s                replicaset-controller  Error creating: pods "metrics-5fbdd57d89-9vkzd" is forbidden: maximum cpu usage per Container is 1, but limit is 4
+  Warning  FailedCreate  4m18s                replicaset-controller  Error creating: pods "metrics-5fbdd57d89-hv6jl" is forbidden: maximum cpu usage per Container is 1, but limit is 4
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msed -i '' 's/backend.default.svc/backend.debug-lab.svc/' broken-chart/values.yaml[27m
+[K[A[32C[27ms[27me[27md[27m [27m-[27mi[27m [27m'[27m'[27m [27m'[27ms[27m/[27mb[27ma[27mc[27mk[27me[27mn[27md[27m.[27md[27me[27mf[27ma[27mu[27ml[27mt[27m.[27ms[27mv[27mc[27m/[27mb[27ma[27mc[27mk[27me[27mn[27md[27m.[27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m.[27ms[27mv[27mc[27m/[27m'[27m [27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mv[27ma[27ml[27mu[27me[27ms[27m.[27my[27ma[27mm[27ml[1B[K[A[113C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mgit diff broken-chart/values.yaml | grep '^[+-]'[27m
+[K[A[32C[27mg[27mi[27mt[27m [27md[27mi[27mf[27mf[27m [27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mv[27ma[27ml[27mu[27me[27ms[27m.[27my[27ma[27mm[27ml[27m [27m|[27m [27mg[27mr[27me[27mp[27m [27m'[27m^[27m[[27m+[27m-[27m][27m'[1B[K[A[80C[?2004l[1B
+--- a/lab/broken-chart/values.yaml
++++ b/lab/broken-chart/values.yaml
+-    BACKEND_URL: "http://backend.default.svc:8080"
++    BACKEND_URL: "http://backend.debug-lab.svc:8080"
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh up 2>&1 | tail -3[27m
+[K[A[32C[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mu[27mp[27m [27m2[27m>[27m&[27m1[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m3[1B[K[A[63C[?2004l[1B
+Lab is (partially) installed. Investigate with kubectl, fix the chart,
+re-run './scenario.sh up' to apply your fixes, and './scenario.sh verify'
+to check progress.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msleep 15[27m
+[K[A[32C[27ms[27ml[27me[27me[27mp[27m [27m1[27m5[1B[K[A[40C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh verify[27m[20D[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mv[27me[27mr[27mi[27mf[27my[?2004l
+==> verifying goal state in namespace debug-lab
+  [32mPASS[0m  migrate Job completed
+  [32mPASS[0m  deployment backend: 1/1 ready
+  [32mPASS[0m  deployment gateway: 1/1 ready
+  [32mPASS[0m  deployment worker: 1/1 ready
+  [31mFAIL[0m  deployment reporter: 0/1 ready
+  [31mFAIL[0m  deployment metrics: 0/1 ready
+  [32mPASS[0m  no pods in CrashLoopBackOff
+  [32mPASS[0m  ServiceAccount debug-lab/reporter can list pods
+  [31mFAIL[0m  backend does not answer on http://backend:8080/healthz
+  [31mFAIL[0m  gateway /status does not report backend=ok
+  [31mFAIL[0m  reporter /report does not return a pod count
+
+[31m5 check(s) failing[0m, 6 passing. Keep digging — every failure is a symptom.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msed -i '' 's/cpu: "2"/cpu: "50m"/; s/cpu: "4"/cpu: "200m"/' broken-chart/values.yaml[27m
+[K[A[32C[27ms[27me[27md[27m [27m-[27mi[27m [27m'[27m'[27m [27m'[27ms[27m/[27mc[27mp[27mu[27m:[27m [27m"[27m2[27m"[27m/[27mc[27mp[27mu[27m:[27m [27m"[27m5[27m0[27mm[27m"[27m/[27m;[27m [27ms[27m/[27mc[27mp[27mu[27m:[27m [27m"[27m4[27m"[27m/[27mc[27mp[27mu[27m:[27m [27m"[27m2[27m0[27m0[27mm[27m"[27m/[27m'[27m [27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mv[27ma[27ml[27mu[27me[27ms[27m.[27my[27ma[27mm[27ml[1B[K[A[116C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mgit diff broken-chart/values.yaml | grep '^[+-]'[27m
+[K[A[32C[27mg[27mi[27mt[27m [27md[27mi[27mf[27mf[27m [27mb[27mr[27mo[27mk[27me[27mn[27m-[27mc[27mh[27ma[27mr[27mt[27m/[27mv[27ma[27ml[27mu[27me[27ms[27m.[27my[27ma[27mm[27ml[27m [27m|[27m [27mg[27mr[27me[27mp[27m [27m'[27m^[27m[[27m+[27m-[27m][27m'[1B[K[A[80C[?2004l[1B
+--- a/lab/broken-chart/values.yaml
++++ b/lab/broken-chart/values.yaml
+-    BACKEND_URL: "http://backend.default.svc:8080"
++    BACKEND_URL: "http://backend.debug-lab.svc:8080"
+-      cpu: "2"
++      cpu: "50m"
+-      cpu: "4"
++      cpu: "200m"
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh up 2>&1 | tail -3[27m
+[K[A[32C[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mu[27mp[27m [27m2[27m>[27m&[27m1[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m3[1B[K[A[63C[?2004l[1B
+Lab is (partially) installed. Investigate with kubectl, fix the chart,
+re-run './scenario.sh up' to apply your fixes, and './scenario.sh verify'
+to check progress.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msleep 20[27m
+[K[A[32C[27ms[27ml[27me[27me[27mp[27m [27m2[27m0[1B[K[A[40C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh verify[27m
+[K[A[32C[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mv[27me[27mr[27mi[27mf[27my[1B[K[A[52C[?2004l[1B
+==> verifying goal state in namespace debug-lab
+  [32mPASS[0m  migrate Job completed
+  [32mPASS[0m  deployment backend: 1/1 ready
+  [32mPASS[0m  deployment gateway: 1/1 ready
+  [32mPASS[0m  deployment worker: 1/1 ready
+  [31mFAIL[0m  deployment reporter: 0/1 ready
+  [32mPASS[0m  deployment metrics: 1/1 ready
+  [32mPASS[0m  no pods in CrashLoopBackOff
+  [32mPASS[0m  ServiceAccount debug-lab/reporter can list pods
+  [31mFAIL[0m  backend does not answer on http://backend:8080/healthz
+  [31mFAIL[0m  gateway /status does not report backend=ok
+  [31mFAIL[0m  reporter /report does not return a pod count
+
+[31m4 check(s) failing[0m, 7 passing. Keep digging — every failure is a symptom.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get pods[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mp[27mo[27md[27ms[1B[K[?2004l
+NAME                        READY   STATUS      RESTARTS   AGE
+backend-7d9bb9d6c4-5lc5d    1/1     Running     0          6m27s
+gateway-76bf9c64cd-85w9d    1/1     Running     0          108s
+metrics-668467ffdf-96b5q    1/1     Running     0          39s
+migrate-8p8l2               0/1     Completed   0          10m
+reporter-648d58fb7d-67m4w   0/1     Running     0          10m
+reporter-c8cd74d-fx76v      0/1     Running     0          6m26s
+worker-7dcff88467-tzmrl     1/1     Running     0          6m26s
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get endpoints backend gateway reporter[27m[59D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27me[27mn[27md[27mp[27mo[27mi[27mn[27mt[27ms[27m [27mb[27ma[27mc[27mk[27me[27mn[27md[27m [27mg[27ma[27mt[27me[27mw[27ma[27my[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[?2004l
+[33;1mWarning:[0m v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME       ENDPOINTS          AGE
+backend    10.244.0.23:8080   14m
+gateway    10.244.0.28:8080   14m
+reporter                      14m
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs reporter-c8cd74d-fx76v --tail=5[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m-[27mc[27m8[27mc[27md[27m7[27m4[27md[27m-[27mf[27mx[27m7[27m6[27mv[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m5[1B[K[A[89C[?2004l[1B
+2026/11/18 07:59:31 GET /healthz -> 503 (from 10.244.0.1:43140)
+2026/11/18 07:59:36 GET /healthz -> 503 (from 10.244.0.1:56650)
+2026/11/18 07:59:41 pod list failed: parse pod list: unexpected end of JSON input
+2026/11/18 07:59:41 GET /healthz -> 503 (from 10.244.0.1:56662)
+2026/11/18 07:59:46 GET /healthz -> 503 (from 10.244.0.1:52644)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get networkpolicy,svc,endpointslices[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mn[27me[27mt[27mw[27mo[27mr[27mk[27mp[27mo[27ml[27mi[27mc[27my[27m,[27ms[27mv[27mc[27m,[27me[27mn[27md[27mp[27mo[27mi[27mn[27mt[27ms[27ml[27mi[27mc[27me[27ms[1B[K[A[89C[?2004l[1B
+NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/backend    ClusterIP   10.96.4.249    <none>        8080/TCP   15m
+service/gateway    ClusterIP   10.96.52.169   <none>        80/TCP     15m
+service/reporter   ClusterIP   10.96.111.69   <none>        8080/TCP   15m
+
+NAME                                            ADDRESSTYPE   PORTS   ENDPOINTS                 AGE
+endpointslice.discovery.k8s.io/backend-g8jsh    IPv4          8080    10.244.0.23               15m
+endpointslice.discovery.k8s.io/gateway-5vlzd    IPv4          8080    10.244.0.28               15m
+endpointslice.discovery.k8s.io/reporter-9hjmg   IPv4          8080    10.244.0.19,10.244.0.25   15m
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab run t1 --rm -i --restart=Never --image=busybox:1.36 --quiet -- sh -c 'wget -q -O- -T 4 ht[7mt[7mp://backend:8080/healthz; echo "rc=$?"; nslookup backend'[27m[K[A[26D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mr[27mu[27mn[27m [27mt[27m1[27m [27m-[27m-[27mr[27mm[27m [27m-[27mi[27m [27m-[27m-[27mr[27me[27ms[27mt[27ma[27mr[27mt[27m=[27mN[27me[27mv[27me[27mr[27m [27m-[27m-[27mi[27mm[27ma[27mg[27me[27m=[27mb[27mu[27ms[27my[27mb[27mo[27mx[27m:[27m1[27m.[27m3[27m6[27m [27m-[27m-[27mq[27mu[27mi[27me[27mt[27m [27m-[27m-[27m [27ms[27mh[27m [27m-[27mc[27m [27m'[27mw[27mg[27me[27mt[27m [27m-[27mq[27m [27m-[27mO[27m-[27m [27m-[27mT[27m [27m4[27m [27mh[27mtt[27mp[27m:[27m/[27m/[27mb[27ma[27mc[27mk[27me[27mn[27md[27m:[27m8[27m0[27m8[27m0[27m/[27mh[27me[27ma[27ml[27mt[27mh[27mz[27m;[27m [27me[27mc[27mh[27mo[27m [27m"[27mr[27mc[27m=[27m$[27m?[27m"[27m;[27m [27mn[27ms[27ml[27mo[27mo[27mk[27mu[27mp[27m [27mb[27ma[27mc[27mk[27me[27mn[27md[27m'[?2004l
+warning: couldn't attach to pod/t1, falling back to streaming logs: Internal error occurred: unable to upgrade connection: container t1 not found in pod t1_debug-lab
+{"status":"ok"}
+rc=0
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+** server can't find backend.svc.cluster.local: NXDOMAIN
+
+Name:	backend.debug-lab.svc.cluster.local
+Address: 10.96.4.249
+
+** server can't find backend.cluster.local: NXDOMAIN
+
+
+** server can't find backend.svc.cluster.local: NXDOMAIN
+
+** server can't find backend.cluster.local: NXDOMAIN
+
+Non-authoritative answer:
+
+** server can't find backend.bbrouter: NXDOMAIN
+
+pod debug-lab/t1 terminated (Error)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh verify[27m
+[K[A[32C[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mv[27me[27mr[27mi[27mf[27my[1B[K[A[52C[?2004l[1B
+==> verifying goal state in namespace debug-lab
+  [32mPASS[0m  migrate Job completed
+  [32mPASS[0m  deployment backend: 1/1 ready
+  [32mPASS[0m  deployment gateway: 1/1 ready
+  [32mPASS[0m  deployment worker: 1/1 ready
+  [31mFAIL[0m  deployment reporter: 0/1 ready
+  [32mPASS[0m  deployment metrics: 1/1 ready
+  [32mPASS[0m  no pods in CrashLoopBackOff
+  [32mPASS[0m  ServiceAccount debug-lab/reporter can list pods
+  [31mFAIL[0m  backend does not answer on http://backend:8080/healthz
+  [31mFAIL[0m  gateway /status does not report backend=ok
+  [31mFAIL[0m  reporter /report does not return a pod count
+
+[31m4 check(s) failing[0m, 7 passing. Keep digging — every failure is a symptom.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs reporter-c8cd74d-fx76v | head -20[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m-[27mc[27m8[27mc[27md[27m7[27m4[27md[27m-[27mf[27mx[27m7[27m6[27mv[27m [27m|[27m [27mh[27me[27ma[27md[27m [27m-[27m2[27m0[1B[K[A[91C[?2004l[1B
+2026/11/18 07:52:44 eb-debug-app 2.0.0 starting: mode=reporter pod=reporter-c8cd74d-fx76v listening on :8080 (image default is 8081; set PORT to override)
+2026/11/18 07:52:51 pod list failed: kubernetes API returned HTTP 403: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:debug-lab:reporter\" cannot list resource \"pods\" in API group \"\" in the namespace \"debug-lab\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+2026/11/18 07:52:51 GET /healthz -> 503 (from 10.244.0.1:37856)
+2026/11/18 07:52:55 GET /healthz -> 503 (from 10.244.0.1:53950)
+2026/11/18 07:53:00 pod list failed: kubernetes API returned HTTP 403: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:debug-lab:reporter\" cannot list resource \"pods\" in API group \"\" in the namespace \"debug-lab\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+2026/11/18 07:53:00 GET /healthz -> 503 (from 10.244.0.1:53964)
+2026/11/18 07:53:05 GET /healthz -> 503 (from 10.244.0.1:34770)
+2026/11/18 07:53:10 pod list failed: kubernetes API returned HTTP 403: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:debug-lab:reporter\" cannot list resource \"pods\" in API group \"\" in the namespace \"debug-lab\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+2026/11/18 07:53:10 GET /healthz -> 503 (from 10.244.0.1:34778)
+2026/11/18 07:53:15 GET /healthz -> 503 (from 10.244.0.1:39544)
+2026/11/18 07:53:20 pod list failed: kubernetes API returned HTTP 403: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:debug-lab:reporter\" cannot list resource \"pods\" in API group \"\" in the namespace \"debug-lab\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+2026/11/18 07:53:20 GET /healthz -> 503 (from 10.244.0.1:39550)
+2026/11/18 07:53:25 pod list failed: kubernetes API returned HTTP 403: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:debug-lab:reporter\" cannot list resource \"pods\" in API group \"\" in the namespace \"debug-lab\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+2026/11/18 07:53:25 GET /healthz -> 503 (from 10.244.0.1:44014)
+2026/11/18 07:53:30 GET /healthz -> 503 (from 10.244.0.1:44024)
+2026/11/18 07:53:35 pod list failed: kubernetes API returned HTTP 403: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:debug-lab:reporter\" cannot list resource \"pods\" in API group \"\" in the namespace \"debug-lab\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+2026/11/18 07:53:35 GET /healthz -> 503 (from 10.244.0.1:56728)
+2026/11/18 07:53:40 GET /healthz -> 503 (from 10.244.0.1:56732)
+2026/11/18 07:53:45 pod list failed: kubernetes API returned HTTP 403: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:debug-lab:reporter\" cannot list resource \"pods\" in API group \"\" in the namespace \"debug-lab\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+2026/11/18 07:53:45 GET /healthz -> 503 (from 10.244.0.1:38046)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab describe pod reporter-c8cd74d-fx76v | grep -A12 -E "Environment|Limits|Last State"[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27md[27me[27ms[27mc[27mr[27mi[27mb[27me[27m [27mp[27mo[27md[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m-[27mc[27m8[27mc[27md[27m7[27m4[27md[27m-[27mf[27mx[27m7[27m6[27mv[27m [27m|[27m [27mg[27mr[27me[27mp[27m [27m-[27mA[27m1[27m2[27m [27m-[27mE[27m [27m"[27mE[27mn[27mv[27mi[27mr[27mo[27mn[27mm[27me[27mn[27mt[27m|[27mL[27mi[27mm[27mi[27mt[27ms[27m|[27mL[27ma[27ms[27mt[27m [27mS[27mt[27ma[27mt[27me[27m"[1B[K[A[135C[?2004l[1B
+    Limits:
+      cpu:     200m
+      memory:  128Mi
+    Requests:
+      cpu:      50m
+      memory:   64Mi
+    Readiness:  http-get http://:8080/healthz delay=3s timeout=3s period=5s #success=1 #failure=3
+    Environment:
+      PORT:       8080
+      NAMESPACE:  debug-lab (v1:metadata.namespace)
+      APP_MODE:   reporter
+      APP_NAME:   reporter
+      VERSION:    2.0.0
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-fzp6d (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get pods -l app=reporter -o wide[27m[53D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mp[27mo[27md[27ms[27m [27m-[27ml[27m [27ma[27mp[27mp[27m=[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m [27m-[27mo[27m [27mw[27mi[27md[27me[?2004l
+NAME                        READY   STATUS    RESTARTS   AGE     IP            NODE                 NOMINATED NODE   READINESS GATES
+reporter-648d58fb7d-67m4w   0/1     Running   0          12m     10.244.0.19   demo-control-plane   <none>           <none>
+reporter-c8cd74d-fx76v      0/1     Running   0          8m37s   10.244.0.25   demo-control-plane   <none>           <none>
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs reporter-c8cd74d-fx76v --tail=8[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m-[27mc[27m8[27mc[27md[27m7[27m4[27md[27m-[27mf[27mx[27m7[27m6[27mv[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m8[1B[K[A[89C[?2004l[1B
+2026/11/18 08:01:28 pod list failed: parse pod list: unexpected end of JSON input
+2026/11/18 08:01:28 GET /healthz -> 503 (from 10.244.0.1:49084)
+2026/11/18 08:01:33 GET /healthz -> 503 (from 10.244.0.1:49092)
+2026/11/18 08:01:38 pod list failed: parse pod list: unexpected end of JSON input
+2026/11/18 08:01:38 GET /healthz -> 503 (from 10.244.0.1:34044)
+2026/11/18 08:01:43 GET /healthz -> 503 (from 10.244.0.1:34048)
+2026/11/18 08:01:48 pod list failed: parse pod list: unexpected end of JSON input
+2026/11/18 08:01:48 GET /healthz -> 503 (from 10.244.0.1:57254)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab run t2 --rm -i --restart=Never --image=busybox:1.36 --quiet -- sh -c 'wget -q -O- -T 6 ht[7mt[7mp://reporter:8080/report; echo "rc=$?"; wget -q -O- -T 6 http://gateway.debug-lab.svc/status; echo "rc=$?"'[27m[K[A[76D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mr[27mu[27mn[27m [27mt[27m2[27m [27m-[27m-[27mr[27mm[27m [27m-[27mi[27m [27m-[27m-[27mr[27me[27ms[27mt[27ma[27mr[27mt[27m=[27mN[27me[27mv[27me[27mr[27m [27m-[27m-[27mi[27mm[27ma[27mg[27me[27m=[27mb[27mu[27ms[27my[27mb[27mo[27mx[27m:[27m1[27m.[27m3[27m6[27m [27m-[27m-[27mq[27mu[27mi[27me[27mt[27m [27m-[27m-[27m [27ms[27mh[27m [27m-[27mc[27m [27m'[27mw[27mg[27me[27mt[27m [27m-[27mq[27m [27m-[27mO[27m-[27m [27m-[27mT[27m [27m6[27m [27mh[27mtt[27mp[27m:[27m/[27m/[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m:[27m8[27m0[27m8[27m0[27m/[27mr[27me[27mp[27mo[27mr[27mt[27m;[27m [27me[27mc[27mh[27mo[27m [27m"[27mr[27mc[27m=[27m$[27m?[27m"[27m;[27m [27mw[27mg[27me[27mt[27m [27m-[27mq[27m [27m-[27mO[27m-[27m [27m-[27mT[27m [27m6[27m [27mh[27mt[27mt[27mp[27m:[27m/[27m/[27mg[27ma[27mt[27me[27mw[27ma[27my[27m.[27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m.[27ms[27mv[27mc[27m/[27ms[27mt[27ma[27mt[27mu[27ms[27m;[27m [27me[27mc[27mh[27mo[27m [27m"[27mr[27mc[27m=[27m$[27m?[27m"[27m'[?2004l
+wget: can't connect to remote host (10.96.111.69): Connection refused
+rc=1
+{"app":"gateway","backend":"ok","backend_url":"http://backend.debug-lab.svc:8080","pod":"gateway-76bf9c64cd-85w9d","self":"ok","version":"2.0.0"}
+rc=0
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get pods -o json --as=system:serviceaccount:debug-lab:reporter | head -c 300; echo[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mp[27mo[27md[27ms[27m [27m-[27mo[27m [27mj[27ms[27mo[27mn[27m [27m-[27m-[27ma[27ms[27m=[27ms[27my[27ms[27mt[27me[27mm[27m:[27ms[27me[27mr[27mv[27mi[27mc[27me[27ma[27mc[27mc[27mo[27mu[27mn[27mt[27m:[27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m:[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m [27m|[27m [27mh[27me[27ma[27md[27m [27m-[27mc[27m [27m3[27m0[27m0[27m;[27m [27me[27mc[27mh[27mo[1B[K[A[135C[?2004l[1B
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2026-11-18T07:52:42Z",
+                "generateName": "backend-7d9bb9d6c4-",
+                "generation": 1,
+               
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab describe pod reporter-c8cd74d-fx76v | tail -12[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27md[27me[27ms[27mc[27mr[27mi[27mb[27me[27m [27mp[27mo[27md[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m-[27mc[27m8[27mc[27md[27m7[27m4[27md[27m-[27mf[27mx[27m7[27m6[27mv[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m1[27m2[1B[K[A[99C[?2004l[1B
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                     From               Message
+  ----     ------     ----                    ----               -------
+  Normal   Scheduled  9m46s                   default-scheduler  Successfully assigned debug-lab/reporter-c8cd74d-fx76v to demo-control-plane
+  Normal   Pulled     9m46s                   kubelet            Container image "docker.io/ebinterview/eb-debug-app:1.0.1" already present on machine and can be accessed by the pod
+  Normal   Created    9m46s                   kubelet            Container created
+  Normal   Started    9m46s                   kubelet            Container started
+  Warning  Unhealthy  4m34s (x63 over 9m38s)  kubelet            Readiness probe failed: HTTP probe failed with statuscode: 503
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get deploy reporter -o jsonpath='{.spec.template.spec}' | head -c 1200; echo[27m[97D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27md[27me[27mp[27ml[27mo[27my[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m [27m-[27mo[27m [27mj[27ms[27mo[27mn[27mp[27ma[27mt[27mh[27m=[27m'[27m{[27m.[27ms[27mp[27me[27mc[27m.[27mt[27me[27mm[27mp[27ml[27ma[27mt[27me[27m.[27ms[27mp[27me[27mc[27m}[27m'[27m [27m|[27m [27mh[27me[27ma[27md[27m [27m-[27mc[27m [27m1[27m2[27m0[27m0[27m;[27m [27me[27mc[27mh[27mo[?2004l
+{"containers":[{"env":[{"name":"PORT","value":"8080"},{"name":"NAMESPACE","valueFrom":{"fieldRef":{"apiVersion":"v1","fieldPath":"metadata.namespace"}}},{"name":"APP_MODE","value":"reporter"},{"name":"APP_NAME","value":"reporter"},{"name":"VERSION","value":"2.0.0"}],"image":"docker.io/ebinterview/eb-debug-app:1.0.1","imagePullPolicy":"IfNotPresent","name":"reporter","ports":[{"containerPort":8080,"name":"http","protocol":"TCP"}],"readinessProbe":{"failureThreshold":3,"httpGet":{"path":"/healthz","port":8080,"scheme":"HTTP"},"initialDelaySeconds":3,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":3},"resources":{"limits":{"cpu":"200m","memory":"128Mi"},"requests":{"cpu":"50m","memory":"64Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":65532},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{},"serviceAccount":"reporter","serviceAccountName":"reporter","terminationGracePeriodSeconds":30}
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get --raw /api/v1/namespaces/debug-lab/pods --as=system:serviceaccount:debug-lab:reporter[7m [7m| wc -c[27m[K
+[K[A[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27m-[27m-[27mr[27ma[27mw[27m [27m/[27ma[27mp[27mi[27m/[27mv[27m1[27m/[27mn[27ma[27mm[27me[27ms[27mp[27ma[27mc[27me[27ms[27m/[27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m/[27mp[27mo[27md[27ms[27m [27m-[27m-[27ma[27ms[27m=[27ms[27my[27ms[27mt[27me[27mm[27m:[27ms[27me[27mr[27mv[27mi[27mc[27me[27ma[27mc[27mc[27mo[27mu[27mn[27mt[27m:[27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m:[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr [27m|[27m [27mw[27mc[27m [27m-[27mc[1B[K[A[8C[?2004l[1B
+   48382
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab run t3 --rm -i --restart=Never --image=busybox:1.36 --quiet \[27m
+[7m  --overrides='{"spec":{"serviceAccountName":"reporter"}}' -- sh -c '[27m[K
+[7mT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)[27m[K
+[7mwget -q -O- -T 6 --no-check-certificate --header "Authorization: Bearer $T" https://kubernetes.default.svc/api/v1/namespaces/debug-lab/pods | [7mw[7mc -c[27m[K
+[7mecho "rc=$?"'[27m[K[5A[19C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mr[27mu[27mn[27m [27mt[27m3[27m [27m-[27m-[27mr[27mm[27m [27m-[27mi[27m [27m-[27m-[27mr[27me[27ms[27mt[27ma[27mr[27mt[27m=[27mN[27me[27mv[27me[27mr[27m [27m-[27m-[27mi[27mm[27ma[27mg[27me[27m=[27mb[27mu[27ms[27my[27mb[27mo[27mx[27m:[27m1[27m.[27m3[27m6[27m [27m-[27m-[27mq[27mu[27mi[27me[27mt[27m [27m\[1B[27m [27m [27m-[27m-[27mo[27mv[27me[27mr[27mr[27mi[27md[27me[27ms[27m=[27m'[27m{[27m"[27ms[27mp[27me[27mc[27m"[27m:[27m{[27m"[27ms[27me[27mr[27mv[27mi[27mc[27me[27mA[27mc[27mc[27mo[27mu[27mn[27mt[27mN[27ma[27mm[27me[27m"[27m:[27m"[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m"[27m}[27m}[27m'[27m [27m-[27m-[27m [27ms[27mh[27m [27m-[27mc[27m [27m'[1B[27mT[27m=[27m$[27m([27mc[27ma[27mt[27m [27m/[27mv[27ma[27mr[27m/[27mr[27mu[27mn[27m/[27ms[27me[27mc[27mr[27me[27mt[27ms[27m/[27mk[27mu[27mb[27me[27mr[27mn[27me[27mt[27me[27ms[27m.[27mi[27mo[27m/[27ms[27me[27mr[27mv[27mi[27mc[27me[27ma[27mc[27mc[27mo[27mu[27mn[27mt[27m/[27mt[27mo[27mk[27me[27mn[27m)[1B[27mw[27mg[27me[27mt[27m [27m-[27mq[27m [27m-[27mO[27m-[27m [27m-[27mT[27m [27m6[27m [27m-[27m-[27mn[27mo[27m-[27mc[27mh[27me[27mc[27mk[27m-[27mc[27me[27mr[27mt[27mi[27mf[27mi[27mc[27ma[27mt[27me[27m [27m-[27m-[27mh[27me[27ma[27md[27me[27mr[27m [27m"[27mA[27mu[27mt[27mh[27mo[27mr[27mi[27mz[27ma[27mt[27mi[27mo[27mn[27m:[27m [27mB[27me[27ma[27mr[27me[27mr[27m [27m$[27mT[27m"[27m [27mh[27mt[27mt[27mp[27ms[27m:[27m/[27m/[27mk[27mu[27mb[27me[27mr[27mn[27me[27mt[27me[27ms[27m.[27md[27me[27mf[27ma[27mu[27ml[27mt[27m.[27ms[27mv[27mc[27m/[27ma[27mp[27mi[27m/[27mv[27m1[27m/[27mn[27ma[27mm[27me[27ms[27mp[27ma[27mc[27me[27ms[27m/[27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m/[27mp[27mo[27md[27ms[27m [27m|[27m w[27mc[27m [27m-[27mc[1B[27me[27mc[27mh[27mo[27m [27m"[27mr[27mc[27m=[27m$[27m?[27m"[27m'[?2004l
+112535
+rc=0
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs reporter-648d58fb7d-67m4w --tail=4[27m[60D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m-[27m6[27m4[27m8[27md[27m5[27m8[27mf[27mb[27m7[27md[27m-[27m6[27m7[27mm[27m4[27mw[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m4[?2004l
+2026/11/18 07:48:23 eb-debug-app 2.0.0 starting: mode=reporter pod=reporter-648d58fb7d-67m4w listening on :8081 (image default is 8081; set PORT to override)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab run t4 --rm -i --restart=Never --image=busybox:1.36 --quiet \[27m
+[7m  --overrides='{"spec":{"serviceAccountName":"reporter"}}' -- sh -c '[27m[K
+[7mT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)[27m[K
+[7mwget -S -O /dev/null -T 6 --no-check-certificate --header "Authorization: Bearer $T" https://kubernetes.default.svc/api/v1/namespaces/debug-la[7mb[7m/pods 2>&1 | head -15'[27m[K[4A[9C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mr[27mu[27mn[27m [27mt[27m4[27m [27m-[27m-[27mr[27mm[27m [27m-[27mi[27m [27m-[27m-[27mr[27me[27ms[27mt[27ma[27mr[27mt[27m=[27mN[27me[27mv[27me[27mr[27m [27m-[27m-[27mi[27mm[27ma[27mg[27me[27m=[27mb[27mu[27ms[27my[27mb[27mo[27mx[27m:[27m1[27m.[27m3[27m6[27m [27m-[27m-[27mq[27mu[27mi[27me[27mt[27m [27m\[1B[27m [27m [27m-[27m-[27mo[27mv[27me[27mr[27mr[27mi[27md[27me[27ms[27m=[27m'[27m{[27m"[27ms[27mp[27me[27mc[27m"[27m:[27m{[27m"[27ms[27me[27mr[27mv[27mi[27mc[27me[27mA[27mc[27mc[27mo[27mu[27mn[27mt[27mN[27ma[27mm[27me[27m"[27m:[27m"[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m"[27m}[27m}[27m'[27m [27m-[27m-[27m [27ms[27mh[27m [27m-[27mc[27m [27m'[1B[27mT[27m=[27m$[27m([27mc[27ma[27mt[27m [27m/[27mv[27ma[27mr[27m/[27mr[27mu[27mn[27m/[27ms[27me[27mc[27mr[27me[27mt[27ms[27m/[27mk[27mu[27mb[27me[27mr[27mn[27me[27mt[27me[27ms[27m.[27mi[27mo[27m/[27ms[27me[27mr[27mv[27mi[27mc[27me[27ma[27mc[27mc[27mo[27mu[27mn[27mt[27m/[27mt[27mo[27mk[27me[27mn[27m)[1B[27mw[27mg[27me[27mt[27m [27m-[27mS[27m [27m-[27mO[27m [27m/[27md[27me[27mv[27m/[27mn[27mu[27ml[27ml[27m [27m-[27mT[27m [27m6[27m [27m-[27m-[27mn[27mo[27m-[27mc[27mh[27me[27mc[27mk[27m-[27mc[27me[27mr[27mt[27mi[27mf[27mi[27mc[27ma[27mt[27me[27m [27m-[27m-[27mh[27me[27ma[27md[27me[27mr[27m [27m"[27mA[27mu[27mt[27mh[27mo[27mr[27mi[27mz[27ma[27mt[27mi[27mo[27mn[27m:[27m [27mB[27me[27ma[27mr[27me[27mr[27m [27m$[27mT[27m"[27m [27mh[27mt[27mt[27mp[27ms[27m:[27m/[27m/[27mk[27mu[27mb[27me[27mr[27mn[27me[27mt[27me[27ms[27m.[27md[27me[27mf[27ma[27mu[27ml[27mt[27m.[27ms[27mv[27mc[27m/[27ma[27mp[27mi[27m/[27mv[27m1[27m/[27mn[27ma[27mm[27me[27ms[27mp[27ma[27mc[27me[27ms[27m/[27md[27me[27mb[27mu[27mg[27m-[27ml[27mab[27m/[27mp[27mo[27md[27ms[27m [27m2[27m>[27m&[27m1[27m [27m|[27m [27mh[27me[27ma[27md[27m [27m-[27m1[27m5[27m'[?2004l
+Connecting to kubernetes.default.svc (10.96.0.1:443)
+  HTTP/1.1 200 OK
+  Audit-Id: ef2c2d67-c1eb-4ca1-ae14-90d5a2af6d84
+  Cache-Control: no-cache, private
+  Content-Type: application/json
+  X-Kubernetes-Pf-Flowschema-Uid: d51eb0db-be78-4fc3-84fe-d6afc3793f85
+  X-Kubernetes-Pf-Prioritylevel-Uid: 8aa261d8-6540-4b0a-8159-37d071660ba7
+  Date: Wed, 18 Nov 2026 08:05:22 GMT
+  Connection: close
+  Transfer-Encoding: chunked
+  
+saving to '/dev/null'
+null                 100% |********************************|  109k  0:00:00 ETA
+'/dev/null' saved
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab logs reporter-c8cd74d-fx76v --since=60s | grep -v healthz[27m[78D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27ml[27mo[27mg[27ms[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m-[27mc[27m8[27mc[27md[27m7[27m4[27md[27m-[27mf[27mx[27m7[27m6[27mv[27m [27m-[27m-[27ms[27mi[27mn[27mc[27me[27m=[27m6[27m0[27ms[27m [27m|[27m [27mg[27mr[27me[27mp[27m [27m-[27mv[27m [27mh[27me[27ma[27ml[27mt[27mh[27mz[?2004l
+2026/11/18 08:04:37 pod list failed: parse pod list: unexpected end of JSON input
+2026/11/18 08:04:47 pod list failed: parse pod list: unexpected end of JSON input
+2026/11/18 08:04:57 pod list failed: parse pod list: unexpected end of JSON input
+2026/11/18 08:05:07 pod list failed: parse pod list: unexpected end of JSON input
+2026/11/18 08:05:15 pod list failed: parse pod list: unexpected end of JSON input
+2026/11/18 08:05:25 pod list failed: parse pod list: unexpected end of JSON input
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get pods --no-headers | wc -l[27m[50D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mp[27mo[27md[27ms[27m [27m-[27m-[27mn[27mo[27m-[27mh[27me[27ma[27md[27me[27mr[27ms[27m [27m|[27m [27mw[27mc[27m [27m-[27ml[?2004l
+       7
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get events --sort-by=.lastTimestamp | tail -8[27m[66D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27me[27mv[27me[27mn[27mt[27ms[27m [27m-[27m-[27ms[27mo[27mr[27mt[27m-[27mb[27my[27m=[27m.[27ml[27ma[27ms[27mt[27mT[27mi[27mm[27me[27ms[27mt[27ma[27mm[27mp[27m [27m|[27m [27mt[27ma[27mi[27ml[27m [27m-[27m8[?2004l
+89s         Normal    Scheduled           pod/t3                           Successfully assigned debug-lab/t3 to demo-control-plane
+89s         Normal    Pulled              pod/t3                           Container image "busybox:1.36" already present on machine and can be accessed by the pod
+89s         Normal    Created             pod/t3                           Container created
+89s         Normal    Started             pod/t3                           Container started
+18s         Normal    Scheduled           pod/t4                           Successfully assigned debug-lab/t4 to demo-control-plane
+18s         Normal    Pulled              pod/t4                           Container image "busybox:1.36" already present on machine and can be accessed by the pod
+18s         Normal    Created             pod/t4                           Container created
+17s         Normal    Started             pod/t4                           Container started
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab debug -it reporter-c8cd74d-fx76v --image=busybox:1.36 --target=reporter -- sh -c 'ls /pro[7mc[7m/1/root/; cat /proc/1/cmdline | tr "\0" " "; echo; cat /proc/1/environ | tr "\0" "\n"'[27m[K[A[55D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27md[27me[27mb[27mu[27mg[27m [27m-[27mi[27mt[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m-[27mc[27m8[27mc[27md[27m7[27m4[27md[27m-[27mf[27mx[27m7[27m6[27mv[27m [27m-[27m-[27mi[27mm[27ma[27mg[27me[27m=[27mb[27mu[27ms[27my[27mb[27mo[27mx[27m:[27m1[27m.[27m3[27m6[27m [27m-[27m-[27mt[27ma[27mr[27mg[27me[27mt[27m=[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m [27m-[27m-[27m [27ms[27mh[27m [27m-[27mc[27m [27m'[27ml[27ms[27m [27m/[27mp[27mr[27moc[27m/[27m1[27m/[27mr[27mo[27mo[27mt[27m/[27m;[27m [27mc[27ma[27mt[27m [27m/[27mp[27mr[27mo[27mc[27m/[27m1[27m/[27mc[27mm[27md[27ml[27mi[27mn[27me[27m [27m|[27m [27mt[27mr[27m [27m"[27m\[27m0[27m"[27m [27m"[27m [27m"[27m;[27m [27me[27mc[27mh[27mo[27m;[27m [27mc[27ma[27mt[27m [27m/[27mp[27mr[27mo[27mc[27m/[27m1[27m/[27me[27mn[27mv[27mi[27mr[27mo[27mn[27m [27m|[27m [27mt[27mr[27m [27m"[27m\[27m0[27m"[27m [27m"[27m\[27mn[27m"[27m'[?2004l
+Targeting container "reporter". If you don't see processes from this container it may be because the container runtime doesn't support this feature.
+--profile=legacy is deprecated and will be removed in the future. It is recommended to explicitly specify a profile, for example "--profile=general".
+Defaulting debug container name to debugger-kcskc.
+ls: /proc/1/root/: Permission denied
+/usr/bin/qemu-x86_64 /eb-debug-app /eb-debug-app 
+cat: can't open '/proc/1/environ': Permission denied
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab port-forward pod/reporter-c8cd74d-fx76v 18080:8080 >/dev/null 2>&1 &[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mp[27mo[27mr[27mt[27m-[27mf[27mo[27mr[27mw[27ma[27mr[27md[27m [27mp[27mo[27md[27m/[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m-[27mc[27m8[27mc[27md[27m7[27m4[27md[27m-[27mf[27mx[27m7[27m6[27mv[27m [27m1[27m8[27m0[27m8[27m0[27m:[27m8[27m0[27m8[27m0[27m [27m>[27m/[27md[27me[27mv[27m/[27mn[27mu[27ml[27ml[27m [27m2[27m>[27m&[27m1[27m [27m&[1B[K[A[121C[?2004l[1B
+[1] 3352
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msleep 2[27m
+[K[A[32C[27ms[27ml[27me[27me[27mp[27m [27m2[1B[K[A[39C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mcurl -si localhost:18080/[27m
+[K[A[32C[27mc[27mu[27mr[27ml[27m [27m-[27ms[27mi[27m [27ml[27mo[27mc[27ma[27ml[27mh[27mo[27ms[27mt[27m:[27m1[27m8[27m0[27m8[27m0[27m/[1B[K[A[57C[?2004l[1B
+HTTP/1.1 200 OK
+[1mContent-Type[0m: application/json
+[1mDate[0m: Wed, 18 Nov 2026 08:07:30 GMT
+[1mContent-Length[0m: 86
+
+{"app":"reporter","mode":"reporter","pod":"reporter-c8cd74d-fx76v","version":"2.0.0"}
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mcurl -si localhost:18080/healthz[27m
+[K[A[32C[27mc[27mu[27mr[27ml[27m [27m-[27ms[27mi[27m [27ml[27mo[27mc[27ma[27ml[27mh[27mo[27ms[27mt[27m:[27m1[27m8[27m0[27m8[27m0[27m/[27mh[27me[27ma[27ml[27mt[27mh[27mz[1B[K[A[64C[?2004l[1B
+HTTP/1.1 503 Service Unavailable
+[1mContent-Type[0m: application/json
+[1mDate[0m: Wed, 18 Nov 2026 08:07:34 GMT
+[1mContent-Length[0m: 78
+
+{"error":"parse pod list: unexpected end of JSON input","status":"unhealthy"}
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mcurl -si localhost:18080/report[27m
+[K[A[32C[27mc[27mu[27mr[27ml[27m [27m-[27ms[27mi[27m [27ml[27mo[27mc[27ma[27ml[27mh[27mo[27ms[27mt[27m:[27m1[27m8[27m0[27m8[27m0[27m/[27mr[27me[27mp[27mo[27mr[27mt[1B[K[A[63C[?2004l[1B
+HTTP/1.1 503 Service Unavailable
+[1mContent-Type[0m: application/json
+[1mDate[0m: Wed, 18 Nov 2026 08:07:40 GMT
+[1mContent-Length[0m: 78
+
+{"error":"parse pod list: unexpected end of JSON input","status":"unhealthy"}
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkill %1[27m[27mk[27mi[27ml[27ml[27m [27m%[27m1[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h
+[1]  + terminated  kubectl -n debug-lab port-forward pod/reporter-c8cd74d-fx76v 18080:8080 >  2>
+[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[7mkubectl create ns scratch[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27mc[27mr[27me[27ma[27mt[27me[27m [27mn[27ms[27m [27ms[27mc[27mr[27ma[27mt[27mc[27mh[1B[K[A[57C[?2004l[1B
+namespace/scratch created
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n scratch apply -f - <<'EOF'[27m
+[7mapiVersion: v1[27m[K
+[7mkind: ServiceAccount[27m[K
+[7mmetadata: {name: reporter}[27m[K
+[7m---[27m[K
+[7mapiVersion: rbac.authorization.k8s.io/v1[27m[K
+[7mkind: Role[27m[K
+[7mmetadata: {name: r}[27m[K
+[7mrules: [{apiGroups: [""], resources: [pods], verbs: [get, list]}][27m[K
+[7m---[27m[K
+[7mapiVersion: rbac.authorization.k8s.io/v1[27m[K
+[7mkind: RoleBinding[27m[K
+[7mmetadata: {name: r}[27m[K
+[7mroleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: r}[27m[K
+[7msubjects: [{kind: ServiceAccount, name: reporter}][27m[K
+[7m---[27m[K
+[7mapiVersion: v1[27m[K
+[7mkind: Pod[27m[K
+[7mmetadata: {name: rep}[27m[K
+[7mspec:[27m[K
+[7m  serviceAccountName: reporter[27m[K
+[7m  containers:[27m[K
+[7m  - name: rep[27m[K
+[7m    image: docker.io/ebinterview/eb-debug-app:1.0.1[27m[K
+[7m    env:[27m[K
+[7m    - {name: PORT, value: "8080"}[27m[K
+[7m    - {name: APP_MODE, value: reporter}[27m[K
+[7m    - {name: APP_NAME, value: reporter}[27m[K
+[7m    - {name: NAMESPACE, valueFrom: {fieldRef: {fieldPath: metadata.namespace}}}[27m[K
+[7m    securityContext: {runAsUser: 65532, runAsNonRoot: true, readOnlyRootFilesystem: true}[27m[K
+[7mEOF[27m[K
+[K[31A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27ms[27mc[27mr[27ma[27mt[27mc[27mh[27m [27ma[27mp[27mp[27ml[27my[27m [27m-[27mf[27m [27m-[27m [27m<[27m<[27m'[27mE[27mO[27mF[27m'[1B[27ma[27mp[27mi[27mV[27me[27mr[27ms[27mi[27mo[27mn[27m:[27m [27mv[27m1[1B[27mk[27mi[27mn[27md[27m:[27m [27mS[27me[27mr[27mv[27mi[27mc[27me[27mA[27mc[27mc[27mo[27mu[27mn[27mt[1B[27mm[27me[27mt[27ma[27md[27ma[27mt[27ma[27m:[27m [27m{[27mn[27ma[27mm[27me[27m:[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m}[1B[27m-[27m-[27m-[1B[27ma[27mp[27mi[27mV[27me[27mr[27ms[27mi[27mo[27mn[27m:[27m [27mr[27mb[27ma[27mc[27m.[27ma[27mu[27mt[27mh[27mo[27mr[27mi[27mz[27ma[27mt[27mi[27mo[27mn[27m.[27mk[27m8[27ms[27m.[27mi[27mo[27m/[27mv[27m1[1B[27mk[27mi[27mn[27md[27m:[27m [27mR[27mo[27ml[27me[1B[27mm[27me[27mt[27ma[27md[27ma[27mt[27ma[27m:[27m [27m{[27mn[27ma[27mm[27me[27m:[27m [27mr[27m}[1B[27mr[27mu[27ml[27me[27ms[27m:[27m [27m[[27m{[27ma[27mp[27mi[27mG[27mr[27mo[27mu[27mp[27ms[27m:[27m [27m[[27m"[27m"[27m][27m,[27m [27mr[27me[27ms[27mo[27mu[27mr[27mc[27me[27ms[27m:[27m [27m[[27mp[27mo[27md[27ms[27m][27m,[27m [27mv[27me[27mr[27mb[27ms[27m:[27m [27m[[27mg[27me[27mt[27m,[27m [27ml[27mi[27ms[27mt[27m][27m}[27m][1B[27m-[27m-[27m-[1B[27ma[27mp[27mi[27mV[27me[27mr[27ms[27mi[27mo[27mn[27m:[27m [27mr[27mb[27ma[27mc[27m.[27ma[27mu[27mt[27mh[27mo[27mr[27mi[27mz[27ma[27mt[27mi[27mo[27mn[27m.[27mk[27m8[27ms[27m.[27mi[27mo[27m/[27mv[27m1[1B[27mk[27mi[27mn[27md[27m:[27m [27mR[27mo[27ml[27me[27mB[27mi[27mn[27md[27mi[27mn[27mg[1B[27mm[27me[27mt[27ma[27md[27ma[27mt[27ma[27m:[27m [27m{[27mn[27ma[27mm[27me[27m:[27m [27mr[27m}[1B[27mr[27mo[27ml[27me[27mR[27me[27mf[27m:[27m [27m{[27ma[27mp[27mi[27mG[27mr[27mo[27mu[27mp[27m:[27m [27mr[27mb[27ma[27mc[27m.[27ma[27mu[27mt[27mh[27mo[27mr[27mi[27mz[27ma[27mt[27mi[27mo[27mn[27m.[27mk[27m8[27ms[27m.[27mi[27mo[27m,[27m [27mk[27mi[27mn[27md[27m:[27m [27mR[27mo[27ml[27me[27m,[27m [27mn[27ma[27mm[27me[27m:[27m [27mr[27m}[1B[27ms[27mu[27mb[27mj[27me[27mc[27mt[27ms[27m:[27m [27m[[27m{[27mk[27mi[27mn[27md[27m:[27m [27mS[27me[27mr[27mv[27mi[27mc[27me[27mA[27mc[27mc[27mo[27mu[27mn[27mt[27m,[27m [27mn[27ma[27mm[27me[27m:[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m}[27m][1B[27m-[27m-[27m-[1B[27ma[27mp[27mi[27mV[27me[27mr[27ms[27mi[27mo[27mn[27m:[27m [27mv[27m1[1B[27mk[27mi[27mn[27md[27m:[27m [27mP[27mo[27md[1B[27mm[27me[27mt[27ma[27md[27ma[27mt[27ma[27m:[27m [27m{[27mn[27ma[27mm[27me[27m:[27m [27mr[27me[27mp[27m}[1B[27ms[27mp[27me[27mc[27m:[1B[27m [27m [27ms[27me[27mr[27mv[27mi[27mc[27me[27mA[27mc[27mc[27mo[27mu[27mn[27mt[27mN[27ma[27mm[27me[27m:[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[1B[27m [27m [27mc[27mo[27mn[27mt[27ma[27mi[27mn[27me[27mr[27ms[27m:[1B[27m [27m [27m-[27m [27mn[27ma[27mm[27me[27m:[27m [27mr[27me[27mp[1B[27m [27m [27m [27m [27mi[27mm[27ma[27mg[27me[27m:[27m [27md[27mo[27mc[27mk[27me[27mr[27m.[27mi[27mo[27m/[27me[27mb[27mi[27mn[27mt[27me[27mr[27mv[27mi[27me[27mw[27m/[27me[27mb[27m-[27md[27me[27mb[27mu[27mg[27m-[27ma[27mp[27mp[27m:[27m1[27m.[27m0[27m.[27m1[1B[27m [27m [27m [27m [27me[27mn[27mv[27m:[1B[27m [27m [27m [27m [27m-[27m [27m{[27mn[27ma[27mm[27me[27m:[27m [27mP[27mO[27mR[27mT[27m,[27m [27mv[27ma[27ml[27mu[27me[27m:[27m [27m"[27m8[27m0[27m8[27m0[27m"[27m}[1B[27m [27m [27m [27m [27m-[27m [27m{[27mn[27ma[27mm[27me[27m:[27m [27mA[27mP[27mP[27m_[27mM[27mO[27mD[27mE[27m,[27m [27mv[27ma[27ml[27mu[27me[27m:[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m}[1B[27m [27m [27m [27m [27m-[27m [27m{[27mn[27ma[27mm[27me[27m:[27m [27mA[27mP[27mP[27m_[27mN[27mA[27mM[27mE[27m,[27m [27mv[27ma[27ml[27mu[27me[27m:[27m [27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m}[1B[27m [27m [27m [27m [27m-[27m [27m{[27mn[27ma[27mm[27me[27m:[27m [27mN[27mA[27mM[27mE[27mS[27mP[27mA[27mC[27mE[27m,[27m [27mv[27ma[27ml[27mu[27me[27mF[27mr[27mo[27mm[27m:[27m [27m{[27mf[27mi[27me[27ml[27md[27mR[27me[27mf[27m:[27m [27m{[27mf[27mi[27me[27ml[27md[27mP[27ma[27mt[27mh[27m:[27m [27mm[27me[27mt[27ma[27md[27ma[27mt[27ma[27m.[27mn[27ma[27mm[27me[27ms[27mp[27ma[27mc[27me[27m}[27m}[27m}[1B[27m [27m [27m [27m [27ms[27me[27mc[27mu[27mr[27mi[27mt[27my[27mC[27mo[27mn[27mt[27me[27mx[27mt[27m:[27m [27m{[27mr[27mu[27mn[27mA[27ms[27mU[27ms[27me[27mr[27m:[27m [27m6[27m5[27m5[27m3[27m2[27m,[27m [27mr[27mu[27mn[27mA[27ms[27mN[27mo[27mn[27mR[27mo[27mo[27mt[27m:[27m [27mt[27mr[27mu[27me[27m,[27m [27mr[27me[27ma[27md[27mO[27mn[27ml[27my[27mR[27mo[27mo[27mt[27mF[27mi[27ml[27me[27ms[27my[27ms[27mt[27me[27mm[27m:[27m [27mt[27mr[27mu[27me[27m}[1B[27mE[27mO[27mF[1B[K[?2004l
+serviceaccount/reporter created
+role.rbac.authorization.k8s.io/r created
+rolebinding.rbac.authorization.k8s.io/r created
+pod/rep created
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msleep 15[27m
+[K[A[32C[27ms[27ml[27me[27me[27mp[27m [27m1[27m5[1B[K[A[40C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n scratch port-forward pod/rep 18081:8080 >/dev/null 2>&1 &[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27ms[27mc[27mr[27ma[27mt[27mc[27mh[27m [27mp[27mo[27mr[27mt[27m-[27mf[27mo[27mr[27mw[27ma[27mr[27md[27m [27mp[27mo[27md[27m/[27mr[27me[27mp[27m [27m1[27m8[27m0[27m8[27m1[27m:[27m8[27m0[27m8[27m0[27m [27m>[27m/[27md[27me[27mv[27m/[27mn[27mu[27ml[27ml[27m [27m2[27m>[27m&[27m1[27m [27m&[1B[K[?2004l
+[1] 4052
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msleep 2[27m
+[K[A[32C[27ms[27ml[27me[27me[27mp[27m [27m2[1B[K[A[39C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mcurl -s localhost:18081/report; echo[27m
+[K[A[32C[27mc[27mu[27mr[27ml[27m [27m-[27ms[27m [27ml[27mo[27mc[27ma[27ml[27mh[27mo[27ms[27mt[27m:[27m1[27m8[27m0[27m8[27m1[27m/[27mr[27me[27mp[27mo[27mr[27mt[27m;[27m [27me[27mc[27mh[27mo[1B[K[A[68C[?2004l[1B
+{"error":"parse pod list: unexpected end of JSON input","status":"unhealthy"}
+
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkill %1[27m
+[K[A[32C[27mk[27mi[27ml[27ml[27m [27m%[27m1[1B[K[A[39C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h
+[1]  + terminated  kubectl -n scratch port-forward pod/rep 18081:8080 > /dev/null 2>&1
+[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[7mkubectl -n scratch logs rep --tail=3[27m[36D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27ms[27mc[27mr[27ma[27mt[27mc[27mh[27m [27ml[27mo[27mg[27ms[27m [27mr[27me[27mp[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m3[?2004l
+2026/11/18 08:08:58 eb-debug-app 0.0.0 starting: mode=reporter pod=rep listening on :8080 (image default is 8081; set PORT to override)
+2026/11/18 08:09:31 pod list failed: parse pod list: unexpected end of JSON input
+2026/11/18 08:09:31 GET /report -> 503 (from 127.0.0.1:57336)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7muname -m[27m
+[K[A[32C[27mu[27mn[27ma[27mm[27me[27m [27m-[27mm[1B[K[A[40C[?2004l[1B
+arm64
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl get node -o jsonpath='{.items[0].status.nodeInfo.architecture}'; echo[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27mg[27me[27mt[27m [27mn[27mo[27md[27me[27m [27m-[27mo[27m [27mj[27ms[27mo[27mn[27mp[27ma[27mt[27mh[27m=[27m'[27m{[27m.[27mi[27mt[27me[27mm[27ms[27m[[27m0[27m][27m.[27ms[27mt[27ma[27mt[27mu[27ms[27m.[27mn[27mo[27md[27me[27mI[27mn[27mf[27mo[27m.[27ma[27mr[27mc[27mh[27mi[27mt[27me[27mc[27mt[27mu[27mr[27me[27m}[27m'[27m;[27m [27me[27mc[27mh[27mo[1B[K[A[109C[?2004l[1B
+arm64
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n scratch delete pod rep --wait=true[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27ms[27mc[27mr[27ma[27mt[27mc[27mh[27m [27md[27me[27ml[27me[27mt[27me[27m [27mp[27mo[27md[27m [27mr[27me[27mp[27m [27m-[27m-[27mw[27ma[27mi[27mt[27m=[27mt[27mr[27mu[27me[1B[K[A[77C[?2004l[1B
+pod "rep" deleted
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n scratch run rep2 --image=docker.io/ebinterview/eb-debug-app:1.0.1 --overrides='{"spec":{"serviceAcc[7mo[7muntName":"reporter","containers":[{"name":"rep2","image":"docker.io/ebinterview/eb-debug-app:1.0.1","env":[{"name":"PORT","value":"8080"},{"n[7ma[7mme":"APP_MODE","value":"reporter"},{"name":"NAMESPACE","value":"scratch"}]}]}}'[27m[K
+[K[3A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27ms[27mc[27mr[27ma[27mt[27mc[27mh[27m [27mr[27mu[27mn[27m [27mr[27me[27mp[27m2[27m [27m-[27m-[27mi[27mm[27ma[27mg[27me[27m=[27md[27mo[27mc[27mk[27me[27mr[27m.[27mi[27mo[27m/[27me[27mb[27mi[27mn[27mt[27me[27mr[27mv[27mi[27me[27mw[27m/[27me[27mb[27m-[27md[27me[27mb[27mu[27mg[27m-[27ma[27mp[27mp[27m:[27m1[27m.[27m0[27m.[27m1[27m [27m-[27m-[27mo[27mv[27me[27mr[27mr[27mi[27md[27me[27ms[27m=[27m'[27m{[27m"[27ms[27mp[27me[27mc[27m"[27m:[27m{[27m"[27ms[27me[27mr[27mv[27mi[27mc[27me[27mA[27mc[27mco[27mu[27mn[27mt[27mN[27ma[27mm[27me[27m"[27m:[27m"[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m"[27m,[27m"[27mc[27mo[27mn[27mt[27ma[27mi[27mn[27me[27mr[27ms[27m"[27m:[27m[[27m{[27m"[27mn[27ma[27mm[27me[27m"[27m:[27m"[27mr[27me[27mp[27m2[27m"[27m,[27m"[27mi[27mm[27ma[27mg[27me[27m"[27m:[27m"[27md[27mo[27mc[27mk[27me[27mr[27m.[27mi[27mo[27m/[27me[27mb[27mi[27mn[27mt[27me[27mr[27mv[27mi[27me[27mw[27m/[27me[27mb[27m-[27md[27me[27mb[27mu[27mg[27m-[27ma[27mp[27mp[27m:[27m1[27m.[27m0[27m.[27m1[27m"[27m,[27m"[27me[27mn[27mv[27m"[27m:[27m[[27m{[27m"[27mn[27ma[27mm[27me[27m"[27m:[27m"[27mP[27mO[27mR[27mT[27m"[27m,[27m"[27mv[27ma[27ml[27mu[27me[27m"[27m:[27m"[27m8[27m0[27m8[27m0[27m"[27m}[27m,[27m{[27m"[27mna[27mm[27me[27m"[27m:[27m"[27mA[27mP[27mP[27m_[27mM[27mO[27mD[27mE[27m"[27m,[27m"[27mv[27ma[27ml[27mu[27me[27m"[27m:[27m"[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m"[27m}[27m,[27m{[27m"[27mn[27ma[27mm[27me[27m"[27m:[27m"[27mN[27mA[27mM[27mE[27mS[27mP[27mA[27mC[27mE[27m"[27m,[27m"[27mv[27ma[27ml[27mu[27me[27m"[27m:[27m"[27ms[27mc[27mr[27ma[27mt[27mc[27mh[27m"[27m}[27m][27m}[27m][27m}[27m}[27m'[1B[K[A[80C[?2004l[1B
+pod/rep2 created
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msleep 12[27m
+[K[A[32C[27ms[27ml[27me[27me[27mp[27m [27m1[27m2[1B[K[A[40C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n scratch logs rep2 --tail=3[27m[37D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27ms[27mc[27mr[27ma[27mt[27mc[27mh[27m [27ml[27mo[27mg[27ms[27m [27mr[27me[27mp[27m2[27m [27m-[27m-[27mt[27ma[27mi[27ml[27m=[27m3[?2004l
+2026/11/18 08:11:00 eb-debug-app 0.0.0 starting: mode=reporter pod=rep2 listening on :8080 (image default is 8081; set PORT to override)
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n scratch port-forward pod/rep2 18082:8080 >/dev/null 2>&1 &[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27ms[27mc[27mr[27ma[27mt[27mc[27mh[27m [27mp[27mo[27mr[27mt[27m-[27mf[27mo[27mr[27mw[27ma[27mr[27md[27m [27mp[27mo[27md[27m/[27mr[27me[27mp[27m2[27m [27m1[27m8[27m0[27m8[27m2[27m:[27m8[27m0[27m8[27m0[27m [27m>[27m/[27md[27me[27mv[27m/[27mn[27mu[27ml[27ml[27m [27m2[27m>[27m&[27m1[27m [27m&[1B[K[A[101C[?2004l[1B
+[1] 5810
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7msleep 2[27m
+[K[A[32C[27ms[27ml[27me[27me[27mp[27m [27m2[1B[K[A[39C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mcurl -s localhost:18082/report; echo[27m
+[K[A[32C[27mc[27mu[27mr[27ml[27m [27m-[27ms[27m [27ml[27mo[27mc[27ma[27ml[27mh[27mo[27ms[27mt[27m:[27m1[27m8[27m0[27m8[27m2[27m/[27mr[27me[27mp[27mo[27mr[27mt[27m;[27m [27me[27mc[27mh[27mo[1B[K[A[68C[?2004l[1B
+{"error":"parse pod list: unexpected end of JSON input","status":"unhealthy"}
+
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkill %1[27m
+[K[A[32C[27mk[27mi[27ml[27ml[27m [27m%[27m1[1B[K[A[39C[?2004l[1B
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h
+[1]  + terminated  kubectl -n scratch port-forward pod/rep2 18082:8080 > /dev/null 2>&1
+[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[7mkubectl delete ns scratch[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27md[27me[27ml[27me[27mt[27me[27m [27mn[27ms[27m [27ms[27mc[27mr[27ma[27mt[27mc[27mh[1B[K[A[57C[?2004l[1B
+namespace "scratch" deleted
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh verify[27m
+[K[A[32C[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mv[27me[27mr[27mi[27mf[27my[1B[K[A[52C[?2004l[1B
+==> verifying goal state in namespace debug-lab
+  [32mPASS[0m  migrate Job completed
+  [32mPASS[0m  deployment backend: 1/1 ready
+  [32mPASS[0m  deployment gateway: 1/1 ready
+  [32mPASS[0m  deployment worker: 1/1 ready
+  [31mFAIL[0m  deployment reporter: 0/1 ready
+  [32mPASS[0m  deployment metrics: 1/1 ready
+  [32mPASS[0m  no pods in CrashLoopBackOff
+  [32mPASS[0m  ServiceAccount debug-lab/reporter can list pods
+  [31mFAIL[0m  backend does not answer on http://backend:8080/healthz
+  [31mFAIL[0m  gateway /status does not report backend=ok
+  [31mFAIL[0m  reporter /report does not return a pod count
+
+[31m4 check(s) failing[0m, 7 passing. Keep digging — every failure is a symptom.
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get pods[27m[29D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mp[27mo[27md[27ms[?2004l
+NAME                        READY   STATUS      RESTARTS   AGE
+backend-7d9bb9d6c4-5lc5d    1/1     Running     0          19m
+gateway-76bf9c64cd-85w9d    1/1     Running     0          15m
+metrics-668467ffdf-96b5q    1/1     Running     0          13m
+migrate-8p8l2               0/1     Completed   0          23m
+reporter-648d58fb7d-67m4w   0/1     Running     0          24m
+reporter-c8cd74d-fx76v      0/1     Running     0          19m
+worker-7dcff88467-tzmrl     1/1     Running     0          19m
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab run eb-probe-x --rm -i --restart=Never --image=busybox:1.36 --quiet --pod-running-timeout[7m=[7m90s --command -- sh -c 'wget -q -O- -T 4 http://backend:8080/healthz >/dev/null 2>&1 && echo PROBE_BACKEND=ok || echo PROBE_BACKEND=fail; ech[7mo[7m "PROBE_GATEWAY_BODY=$(wget -q -O- -T 6 http://gateway.debug-lab.svc/status 2>/dev/null)"; echo "PROBE_REPORTER_BODY=$(wget -q -O- -T 6 http:[7m/[7m/reporter:8080/report 2>/dev/null)"'[27m[K[3A[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mr[27mu[27mn[27m [27me[27mb[27m-[27mp[27mr[27mo[27mb[27me[27m-[27mx[27m [27m-[27m-[27mr[27mm[27m [27m-[27mi[27m [27m-[27m-[27mr[27me[27ms[27mt[27ma[27mr[27mt[27m=[27mN[27me[27mv[27me[27mr[27m [27m-[27m-[27mi[27mm[27ma[27mg[27me[27m=[27mb[27mu[27ms[27my[27mb[27mo[27mx[27m:[27m1[27m.[27m3[27m6[27m [27m-[27m-[27mq[27mu[27mi[27me[27mt[27m [27m-[27m-[27mp[27mo[27md[27m-[27mr[27mu[27mn[27mn[27mi[27mn[27mg[27m-[27mt[27mi[27mm[27me[27mo[27mu[27mt=[27m9[27m0[27ms[27m [27m-[27m-[27mc[27mo[27mm[27mm[27ma[27mn[27md[27m [27m-[27m-[27m [27ms[27mh[27m [27m-[27mc[27m [27m'[27mw[27mg[27me[27mt[27m [27m-[27mq[27m [27m-[27mO[27m-[27m [27m-[27mT[27m [27m4[27m [27mh[27mt[27mt[27mp[27m:[27m/[27m/[27mb[27ma[27mc[27mk[27me[27mn[27md[27m:[27m8[27m0[27m8[27m0[27m/[27mh[27me[27ma[27ml[27mt[27mh[27mz[27m [27m>[27m/[27md[27me[27mv[27m/[27mn[27mu[27ml[27ml[27m [27m2[27m>[27m&[27m1[27m [27m&[27m&[27m [27me[27mc[27mh[27mo[27m [27mP[27mR[27mO[27mB[27mE[27m_[27mB[27mA[27mC[27mK[27mE[27mN[27mD[27m=[27mo[27mk[27m [27m|[27m|[27m [27me[27mc[27mh[27mo[27m [27mP[27mR[27mO[27mB[27mE[27m_[27mB[27mA[27mC[27mK[27mE[27mN[27mD[27m=[27mf[27ma[27mi[27ml[27m;[27m [27me[27mc[27mho[27m [27m"[27mP[27mR[27mO[27mB[27mE[27m_[27mG[27mA[27mT[27mE[27mW[27mA[27mY[27m_[27mB[27mO[27mD[27mY[27m=[27m$[27m([27mw[27mg[27me[27mt[27m [27m-[27mq[27m [27m-[27mO[27m-[27m [27m-[27mT[27m [27m6[27m [27mh[27mt[27mt[27mp[27m:[27m/[27m/[27mg[27ma[27mt[27me[27mw[27ma[27my[27m.[27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m.[27ms[27mv[27mc[27m/[27ms[27mt[27ma[27mt[27mu[27ms[27m [27m2[27m>[27m/[27md[27me[27mv[27m/[27mn[27mu[27ml[27ml[27m)[27m"[27m;[27m [27me[27mc[27mh[27mo[27m [27m"[27mP[27mR[27mO[27mB[27mE[27m_[27mR[27mE[27mP[27mO[27mR[27mT[27mE[27mR[27m_[27mB[27mO[27mD[27mY[27m=[27m$[27m([27mw[27mg[27me[27mt[27m [27m-[27mq[27m [27m-[27mO[27m-[27m [27m-[27mT[27m [27m6[27m [27mh[27mt[27mt[27mp[27m:/[27m/[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m:[27m8[27m0[27m8[27m0[27m/[27mr[27me[27mp[27mo[27mr[27mt[27m [27m2[27m>[27m/[27md[27me[27mv[27m/[27mn[27mu[27ml[27ml[27m)[27m"[27m'[?2004l
+PROBE_REPORTER_BODY=
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab run eb-probe-y --rm -i --restart=Never --image=busybox:1.36 --quiet --pod-running-timeout[7m=[7m90s --command -- sh -c 'sleep 5; wget -q -O- -T 4 http://backend:8080/healthz >/dev/null 2>&1 && echo PROBE_BACKEND=ok || echo PROBE_BACKEND=[7mf[7mail; echo "PROBE_GATEWAY_BODY=$(wget -q -O- -T 6 http://gateway.debug-lab.svc/status 2>/dev/null)"; echo "PROBE_REPORTER_BODY=$(wget -q -O- -[7mT[7m 6 http://reporter:8080/report 2>/dev/null)"'[27m[K[3A[14D[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mr[27mu[27mn[27m [27me[27mb[27m-[27mp[27mr[27mo[27mb[27me[27m-[27my[27m [27m-[27m-[27mr[27mm[27m [27m-[27mi[27m [27m-[27m-[27mr[27me[27ms[27mt[27ma[27mr[27mt[27m=[27mN[27me[27mv[27me[27mr[27m [27m-[27m-[27mi[27mm[27ma[27mg[27me[27m=[27mb[27mu[27ms[27my[27mb[27mo[27mx[27m:[27m1[27m.[27m3[27m6[27m [27m-[27m-[27mq[27mu[27mi[27me[27mt[27m [27m-[27m-[27mp[27mo[27md[27m-[27mr[27mu[27mn[27mn[27mi[27mn[27mg[27m-[27mt[27mi[27mm[27me[27mo[27mu[27mt=[27m9[27m0[27ms[27m [27m-[27m-[27mc[27mo[27mm[27mm[27ma[27mn[27md[27m [27m-[27m-[27m [27ms[27mh[27m [27m-[27mc[27m [27m'[27ms[27ml[27me[27me[27mp[27m [27m5[27m;[27m [27mw[27mg[27me[27mt[27m [27m-[27mq[27m [27m-[27mO[27m-[27m [27m-[27mT[27m [27m4[27m [27mh[27mt[27mt[27mp[27m:[27m/[27m/[27mb[27ma[27mc[27mk[27me[27mn[27md[27m:[27m8[27m0[27m8[27m0[27m/[27mh[27me[27ma[27ml[27mt[27mh[27mz[27m [27m>[27m/[27md[27me[27mv[27m/[27mn[27mu[27ml[27ml[27m [27m2[27m>[27m&[27m1[27m [27m&[27m&[27m [27me[27mc[27mh[27mo[27m [27mP[27mR[27mO[27mB[27mE[27m_[27mB[27mA[27mC[27mK[27mE[27mN[27mD[27m=[27mo[27mk[27m [27m|[27m|[27m [27me[27mc[27mh[27mo[27m [27mP[27mR[27mO[27mB[27mE[27m_[27mB[27mA[27mC[27mK[27mE[27mN[27mD[27m=f[27ma[27mi[27ml[27m;[27m [27me[27mc[27mh[27mo[27m [27m"[27mP[27mR[27mO[27mB[27mE[27m_[27mG[27mA[27mT[27mE[27mW[27mA[27mY[27m_[27mB[27mO[27mD[27mY[27m=[27m$[27m([27mw[27mg[27me[27mt[27m [27m-[27mq[27m [27m-[27mO[27m-[27m [27m-[27mT[27m [27m6[27m [27mh[27mt[27mt[27mp[27m:[27m/[27m/[27mg[27ma[27mt[27me[27mw[27ma[27my[27m.[27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m.[27ms[27mv[27mc[27m/[27ms[27mt[27ma[27mt[27mu[27ms[27m [27m2[27m>[27m/[27md[27me[27mv[27m/[27mn[27mu[27ml[27ml[27m)[27m"[27m;[27m [27me[27mc[27mh[27mo[27m [27m"[27mP[27mR[27mO[27mB[27mE[27m_[27mR[27mE[27mP[27mO[27mR[27mT[27mE[27mR[27m_[27mB[27mO[27mD[27mY[27m=[27m$[27m([27mw[27mg[27me[27mt[27m [27m-[27mq[27m [27m-[27mO[27m-[27m [27m-T[27m [27m6[27m [27mh[27mt[27mt[27mp[27m:[27m/[27m/[27mr[27me[27mp[27mo[27mr[27mt[27me[27mr[27m:[27m8[27m0[27m8[27m0[27m/[27mr[27me[27mp[27mo[27mr[27mt[27m [27m2[27m>[27m/[27md[27me[27mv[27m/[27mn[27mu[27ml[27ml[27m)[27m"[27m'[?2004l
+PROBE_BACKEND=ok
+PROBE_GATEWAY_BODY={"app":"gateway","backend":"ok","backend_url":"http://backend.debug-lab.svc:8080","pod":"gateway-76bf9c64cd-85w9d","self":"ok","version":"2.0.0"}
+PROBE_REPORTER_BODY=
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mdocker exec demo-control-plane crictl inspecti docker.io/ebinterview/eb-debug-app:1.0.1 | grep -i -E "architec[7mt[7mure|os\""[27m[K
+[K[A[A[32C[27md[27mo[27mc[27mk[27me[27mr[27m [27me[27mx[27me[27mc[27m [27md[27me[27mm[27mo[27m-[27mc[27mo[27mn[27mt[27mr[27mo[27ml[27m-[27mp[27ml[27ma[27mn[27me[27m [27mc[27mr[27mi[27mc[27mt[27ml[27m [27mi[27mn[27ms[27mp[27me[27mc[27mt[27mi[27m [27md[27mo[27mc[27mk[27me[27mr[27m.[27mi[27mo[27m/[27me[27mb[27mi[27mn[27mt[27me[27mr[27mv[27mi[27me[27mw[27m/[27me[27mb[27m-[27md[27me[27mb[27mu[27mg[27m-[27ma[27mp[27mp[27m:[27m1[27m.[27m0[27m.[27m1[27m [27m|[27m [27mg[27mr[27me[27mp[27m [27m-[27mi[27m [27m-[27mE[27m [27m"[27ma[27mr[27mc[27mh[27mi[27mt[27me[27mct[27mu[27mr[27me[27m|[27mo[27ms[27m\[27m"[27m"[1B[K[A[10C[?2004l[1B
+      "architecture": "amd64",
+      "os": "linux",
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh verify | grep -E "FAIL|ALL GREEN"[27m
+[K[A[32C[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mv[27me[27mr[27mi[27mf[27my[27m [27m|[27m [27mg[27mr[27me[27mp[27m [27m-[27mE[27m [27m"[27mF[27mA[27mI[27mL[27m|[27mA[27mL[27mL[27m [27mG[27mR[27mE[27mE[27mN[27m"[1B[K[A[79C[?2004l[1B
+  [31mFAIL[0m  deployment reporter: 0/1 ready
+  [31mFAIL[0m  backend does not answer on http://backend:8080/healthz
+  [31mFAIL[0m  gateway /status does not report backend=ok
+  [31mFAIL[0m  reporter /report does not return a pod count
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7m./scenario.sh verify | grep -E "FAIL|ALL GREEN"[27m[47D[27m.[27m/[27ms[27mc[27me[27mn[27ma[27mr[27mi[27mo[27m.[27ms[27mh[27m [27mv[27me[27mr[27mi[27mf[27my[27m [27m|[27m [27mg[27mr[27me[27mp[27m [27m-[27mE[27m [27m"[27mF[27mA[27mI[27mL[27m|[27mA[27mL[27mL[27m [27mG[27mR[27mE[27mE[27mN[27m"[?2004l
+  [31mFAIL[0m  deployment reporter: 0/1 ready
+  [31mFAIL[0m  backend does not answer on http://backend:8080/healthz
+  [31mFAIL[0m  gateway /status does not report backend=ok
+  [31mFAIL[0m  reporter /report does not return a pod count
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mkubectl -n debug-lab get pods[27m
+[K[A[32C[27mk[27mu[27mb[27me[27mc[27mt[27ml[27m [27m-[27mn[27m [27md[27me[27mb[27mu[27mg[27m-[27ml[27ma[27mb[27m [27mg[27me[27mt[27m [27mp[27mo[27md[27ms[1B[K[A[61C[?2004l[1B
+NAME                        READY   STATUS      RESTARTS   AGE
+backend-7d9bb9d6c4-5lc5d    1/1     Running     0          23m
+gateway-76bf9c64cd-85w9d    1/1     Running     0          19m
+metrics-668467ffdf-96b5q    1/1     Running     0          18m
+migrate-8p8l2               0/1     Completed   0          27m
+reporter-648d58fb7d-67m4w   0/1     Running     0          28m
+reporter-c8cd74d-fx76v      0/1     Running     0          23m
+worker-7dcff88467-tzmrl     1/1     Running     0          23m
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mgit status --short[27m
+[K[A[32C[27mg[27mi[27mt[27m [27ms[27mt[27ma[27mt[27mu[27ms[27m [27m-[27m-[27ms[27mh[27mo[27mr[27mt[1B[K[A[50C[?2004l[1B
+ [31mM[m broken-chart/templates/backend.yaml
+ [31mM[m broken-chart/templates/gateway.yaml
+ [31mM[m broken-chart/templates/metrics.yaml
+ [31mM[m broken-chart/templates/migrate-job.yaml
+ [31mM[m broken-chart/templates/rbac.yaml
+ [31mM[m broken-chart/templates/reporter.yaml
+ [31mM[m broken-chart/templates/worker.yaml
+ [31mM[m broken-chart/values.yaml
+[31m??[m part4-session.log
+[1m[7m%[27m[1m[0m                                                                                                                                              ]7;file://BOM-T63D00HFYW/Users/ayushrusia/eb-devops/lab[0m[27m[24m[Jayushrusia@BOM-T63D00HFYW lab % [K[?2004h[7mexit[27m[27me[27mx[27mi[27mt[?2004l
+
+Saving session...
+...copying shared history...
+...saving history...truncating history files...
+...completed.
