@@ -11,9 +11,10 @@ jobs:
       - name: Build image
         run: docker build -t demo-service:ci service/
       - name: Trivy scan (fail on HIGH or CRITICAL)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: demo-service:ci
+          version: v0.69.3
           severity: HIGH,CRITICAL
           exit-code: "1"
           ignore-unfixed: true
